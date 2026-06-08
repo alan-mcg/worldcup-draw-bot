@@ -1,0 +1,15 @@
+[
+  {
+    "id": "draw1",
+    "name": "Work Draw 🏢",
+    "description": "Office World Cup sweepstake",
+    "group": {
+      "callmebot_group_id": "",
+      "callmebot_apikey": ""
+    },
+    "users": [
+      { "id": "u1", "name": "Alice",  "phone": "+353871111111", "teams": ["FRA", "BRA", "ESP"] },
+      { "id": "u2", "name": "Bob",    "phone": "+353872222222", "teams": ["ENG", "GER", "ARG"] }
+    ]
+  }
+]

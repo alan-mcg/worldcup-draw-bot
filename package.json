@@ -1,0 +1,25 @@
+{
+  "name": "worldcup-draw-bot",
+  "version": "3.0.0",
+  "description": "WhatsApp World Cup 2026 sweepstake bot — multiple draws, live scores, daily group updates",
+  "main": "bot.js",
+  "scripts": {
+    "setup":    "node setup.js",
+    "start":    "node server.js",
+    "bot":      "node bot.js",
+    "dry-run":  "node bot.js --dry-run",
+    "sync":     "node bot.js --dry-run --sync",
+    "schedule": "node scheduler.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "world-cup", "2026", "fifa", "sweepstake", "draw", "whatsapp", "bot",
+    "football", "soccer", "callmebot", "api-football"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "node-cron": "^3.0.3"
+  }
+}

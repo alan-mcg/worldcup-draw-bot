@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>⚽ World Cup Draw Bot</title>
+<style>
+:root{--g:#1a7a3c;--gL:#e8f5ee;--gD:#0f5228;--gold:#c9a227;--goldL:#fdf6e3;--red:#c0392b;--blue:#1a5a9a;--blueL:#e8f0fb;--bg:#f2f6f3;--card:#fff;--border:#d4e0d7;--text:#1a2e1f;--muted:#6b7f70;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Georgia,serif;background:var(--bg);color:var(--text);min-height:100vh}
+/* sidebar layout */
+.layout{display:flex;min-height:calc(100vh - 56px)}
+header{background:linear-gradient(135deg,var(--gD),var(--g));color:#fff;padding:.9rem 1.5rem;display:flex;align-items:center;gap:.75rem;position:sticky;top:0;z-index:50}
+header h1{font-size:1.25rem;letter-spacing:.3px}
+header p{font-size:.8rem;opacity:.8;font-style:italic}
+.sidebar{width:230px;flex-shrink:0;background:var(--gD);color:#fff;display:flex;flex-direction:column;padding:1rem 0}
+.sidebar-section{padding:.5rem 1rem .25rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.8px;opacity:.55;margin-top:.5rem}
+.sidebar-btn{display:flex;align-items:center;gap:.5rem;padding:.6rem 1.25rem;cursor:pointer;font-size:.88rem;font-family:inherit;background:none;border:none;color:rgba(255,255,255,.8);width:100%;text-align:left;transition:.15s;border-left:3px solid transparent}
+.sidebar-btn:hover{background:rgba(255,255,255,.08);color:#fff}
+.sidebar-btn.active{background:rgba(255,255,255,.15);color:#fff;border-left-color:#7ef5a8}
+.draw-pill{display:flex;align-items:center;justify-content:space-between;padding:.55rem 1.25rem;cursor:pointer;font-size:.85rem;font-family:inherit;background:none;border:none;color:rgba(255,255,255,.75);width:100%;text-align:left;transition:.15s;border-left:3px solid transparent}
+.draw-pill:hover{background:rgba(255,255,255,.08);color:#fff}
+.draw-pill.active{background:rgba(255,255,255,.15);color:#fff;border-left-color:#ffd700}
+.draw-pill .pill-badge{background:rgba(255,255,255,.18);border-radius:20px;padding:.1rem .45rem;font-size:.7rem}
+.sidebar-add{margin:.5rem 1.25rem;padding:.4rem .75rem;background:rgba(255,255,255,.12);border:1px dashed rgba(255,255,255,.3);border-radius:6px;color:rgba(255,255,255,.7);font-size:.82rem;cursor:pointer;font-family:inherit;text-align:center;transition:.15s}
+.sidebar-add:hover{background:rgba(255,255,255,.2);color:#fff}
+main{flex:1;overflow:auto;padding:1.75rem;max-width:960px}
+.section{display:none}.section.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;margin-bottom:1.25rem}
+.card h2{font-size:1.05rem;color:var(--gD);margin-bottom:1rem}
+.page-title{font-size:1.3rem;font-weight:bold;color:var(--gD);margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th{text-align:left;padding:.45rem .7rem;background:var(--gL);color:var(--gD);font-size:.75rem;text-transform:uppercase;letter-spacing:.4px}
+td{padding:.55rem .7rem;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafcfa}
+input[type=text],input[type=tel],input[type=date],input[type=time],input[type=number],select,textarea{border:1px solid var(--border);border-radius:6px;padding:.4rem .65rem;font-size:.88rem;font-family:inherit;background:#fff;color:var(--text);width:100%}
+input:focus,select:focus{outline:2px solid var(--g);border-color:transparent}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:.4rem .9rem;border-radius:6px;border:1px solid;cursor:pointer;font-size:.83rem;font-family:inherit;transition:.15s}
+.btn-primary{background:var(--g);color:#fff;border-color:var(--g)}.btn-primary:hover{background:var(--gD)}
+.btn-secondary{background:#fff;color:var(--g);border-color:var(--g)}.btn-secondary:hover{background:var(--gL)}
+.btn-danger{background:#fff;color:var(--red);border-color:var(--red)}.btn-danger:hover{background:#fdf0ef}
+.btn-gold{background:var(--gold);color:#fff;border-color:var(--gold)}.btn-gold:hover{background:#a88320}
+.btn-blue{background:var(--blue);color:#fff;border-color:var(--blue)}.btn-blue:hover{background:#0f3f72}
+.btn-sm{padding:.28rem .65rem;font-size:.78rem}
+.badge{display:inline-block;padding:.12rem .5rem;border-radius:20px;font-size:.73rem;font-weight:bold}
+.bg-green{background:var(--gL);color:var(--gD)}.bg-gold{background:var(--goldL);color:#7a6010}
+.bg-gray{background:#f0f0f0;color:#555}.bg-red{background:#fdf0ef;color:var(--red)}
+.bg-blue{background:var(--blueL);color:var(--blue)}
+.toolbar{display:flex;gap:.6rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
+.form-row{margin-bottom:.85rem}
+.form-row label{display:block;font-size:.75rem;color:var(--muted);margin-bottom:.22rem;text-transform:uppercase;letter-spacing:.4px}
+.form-2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.85rem}
+.tag-grid{display:flex;flex-wrap:wrap;gap:.35rem;max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;padding:.5rem}
+.tag{display:inline-flex;align-items:center;gap:3px;padding:.22rem .6rem;border-radius:20px;font-size:.78rem;background:var(--gL);color:var(--gD);cursor:pointer;border:2px solid transparent;transition:.1s}
+.tag.selected{border-color:var(--g);background:var(--g);color:#fff}
+.modal-back{display:none;position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:100;align-items:center;justify-content:center}
+.modal-back.open{display:flex}
+.modal{background:#fff;border-radius:var(--r);padding:1.6rem;max-width:500px;width:92%;max-height:88vh;overflow-y:auto}
+.modal h2{margin-bottom:1rem;font-size:1.05rem;color:var(--gD)}
+.preview-box{background:#1a1a1a;color:#e8e8e8;border-radius:8px;padding:1rem;font-family:monospace;font-size:.78rem;white-space:pre-wrap;max-height:420px;overflow-y:auto;line-height:1.65}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.85rem;margin-bottom:1.25rem}
+.stat-card{background:var(--gL);border-radius:var(--r);padding:.9rem;text-align:center}
+.stat-card .val{font-size:1.9rem;font-weight:bold;color:var(--gD)}
+.stat-card .lbl{font-size:.73rem;color:var(--muted);margin-top:.2rem;text-transform:uppercase;letter-spacing:.4px}
+.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-weight:bold;font-size:.82rem}
+.rk1{background:#ffd700;color:#7a6010}.rk2{background:#c0c0c0;color:#444}.rk3{background:#cd7f32;color:#fff}.rkn{background:var(--gL);color:var(--gD)}
+.pts-big{font-size:1.25rem;font-weight:bold;color:var(--gD)}
+.info-box{padding:.9rem 1rem;border-radius:8px;font-size:.85rem;line-height:1.7;margin-bottom:1.1rem}
+.info-yellow{background:#fffbea;border:1px solid #e6d68a}
+.info-blue{background:var(--blueL);border:1px solid #b5cef0}
+.info-box code{background:#fff3;padding:1px 4px;border-radius:3px;font-size:.8rem}
+.rivalry-box{background:linear-gradient(135deg,#fff7e0,#fff);border:1px solid #e8c96a;border-radius:8px;padding:.85rem 1rem;font-size:.85rem;line-height:1.75;margin-bottom:1rem}
+.kp{display:inline-flex;align-items:center;gap:3px;background:var(--blueL);color:var(--blue);border-radius:20px;padding:.12rem .55rem;font-size:.75rem;font-weight:bold}
+.score-row{display:flex;align-items:center;gap:.5rem}
+.score-row input{width:58px;text-align:center}
+.vs{color:var(--muted);font-style:italic;font-size:.83rem}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--gD);color:#fff;padding:.65rem 1.1rem;border-radius:8px;font-size:.88rem;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.empty{text-align:center;color:var(--muted);padding:2rem;font-style:italic}
+.sep{border:none;border-top:1px solid var(--border);margin:1rem 0}
+.draw-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.5rem}
+.no-draw{display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;color:var(--muted);gap:1rem}
+.no-draw .big-icon{font-size:3rem}
+.group-tag{display:inline-block;background:var(--goldL);color:#7a6010;border-radius:4px;padding:.1rem .4rem;font-size:.72rem;font-weight:bold;margin-left:.3rem}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="font-size:2rem">⚽</div>
+  <div>
+    <h1>World Cup Draw Bot 2026</h1>
+    <p>Multiple draws · Group WhatsApp · Live fixtures via API-Football</p>
+  </div>
+  <div style="margin-left:auto;display:flex;gap:.5rem">
+    <button class="btn btn-secondary btn-sm" onclick="syncToday()" title="Sync today's results from API-Football">🔄 Sync Today</button>
+    <button class="btn btn-blue btn-sm" onclick="showSection('settings')">⚙️ Settings</button>
+  </div>
+</header>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-section">Navigation</div>
+  <button class="sidebar-btn active" data-sec="overview" onclick="showSection('overview',this)">🏠 Overview</button>
+  <button class="sidebar-btn" data-sec="teams" onclick="showSection('teams',this)">🌍 Teams</button>
+  <button class="sidebar-btn" data-sec="matches" onclick="showSection('matches',this)">📅 Fixtures</button>
+
+  <div class="sidebar-section" style="margin-top:1rem">My Draws</div>
+  <div id="draws-list"></div>
+  <button class="sidebar-add" onclick="openNewDrawModal()">+ New Draw</button>
+
+  <div class="sidebar-section" style="margin-top:auto">System</div>
+  <button class="sidebar-btn" data-sec="settings" onclick="showSection('settings',this)">⚙️ Settings</button>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main>
+
+<!-- OVERVIEW -->
+<div id="sec-overview" class="section active">
+  <div class="page-title">🏠 Overview</div>
+  <div class="stat-grid" id="overview-stats"></div>
+  <div class="card">
+    <h2>All Draws</h2>
+    <table>
+      <thead><tr><th>Draw Name</th><th>Participants</th><th>Leader</th><th>Top Score</th><th>Actions</th></tr></thead>
+      <tbody id="overview-draws-table"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- DRAW (dynamic) -->
+<div id="sec-draw" class="section">
+  <div id="draw-content"></div>
+</div>
+
+<!-- TEAMS -->
+<div id="sec-teams" class="section">
+  <div class="draw-header">
+    <div class="page-title">🌍 2026 World Cup Teams (48)</div>
+    <button class="btn btn-primary btn-sm" onclick="openTeamModal()">+ Add Team</button>
+  </div>
+  <div class="card">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:.85rem" id="teams-by-group"></div>
+  </div>
+</div>
+
+<!-- MATCHES -->
+<div id="sec-matches" class="section">
+  <div class="draw-header">
+    <div class="page-title">📅 Fixtures & Results</div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <button class="btn btn-blue btn-sm" onclick="syncToday()">🔄 Sync Today</button>
+      <button class="btn btn-secondary btn-sm" onclick="syncAll()">🔄 Sync All Fixtures</button>
+      <button class="btn btn-primary btn-sm" onclick="openMatchModal()">+ Add Match</button>
+    </div>
+  </div>
+  <div class="info-blue info-box" id="sync-status"></div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Date</th><th>⏰</th><th>Stage</th><th>Home</th><th>Score</th><th>Away</th><th>Venue</th><th>Status</th><th></th></tr></thead>
+      <tbody id="matches-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="sec-settings" class="section">
+  <div class="page-title">⚙️ Settings</div>
+
+  <div class="card">
+    <h2>🔗 API-Football (Live Fixtures)</h2>
+    <div class="info-yellow info-box">
+      <strong>Free plan:</strong> 100 requests/day — more than enough for daily syncing.<br>
+      Sign up at <a href="https://dashboard.api-football.com/register" target="_blank" style="color:var(--blue)">dashboard.api-football.com</a> →
+      copy your API key from the dashboard.<br>
+      The World Cup uses <strong>league ID 1, season 2026</strong> (already set).
+    </div>
+    <div class="form-row"><label>API-Football Key</label><input type="text" id="cfg-apikey" placeholder="Your x-apisports-key here"/></div>
+    <div style="display:flex;gap:.5rem;margin-top:.75rem">
+      <button class="btn btn-blue" onclick="saveConfig()">Save</button>
+      <button class="btn btn-secondary" onclick="syncAll()">🔄 Sync All Fixtures Now</button>
+      <button class="btn btn-secondary" onclick="syncToday()">🔄 Sync Today</button>
+    </div>
+    <p id="last-synced" style="font-size:.8rem;color:var(--muted);margin-top:.75rem"></p>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- DRAW MODAL -->
+<div id="draw-modal" class="modal-back">
+  <div class="modal">
+    <h2 id="draw-modal-title">New Draw</h2>
+    <div class="form-row"><label>Draw Name</label><input type="text" id="dm-name" placeholder="Work Lads 🏢"/></div>
+    <div class="form-row"><label>Description (optional)</label><input type="text" id="dm-desc" placeholder="Office sweepstake 2026"/></div>
+    <hr class="sep"/>
+    <h2 style="font-size:.95rem;color:var(--gD);margin-bottom:.75rem">WhatsApp Group</h2>
+    <div class="info-yellow info-box" style="font-size:.8rem">
+      Add CallMeBot (+34 644 80 21 26) to the group, then send <code>I allow callmebot to send me messages</code> in the group to get the Group ID and API key.
+    </div>
+    <div class="form-row"><label>CallMeBot Group ID</label><input type="text" id="dm-groupid" placeholder="e.g. 123456789@g.us"/></div>
+    <div class="form-row"><label>CallMeBot API Key</label><input type="text" id="dm-apikey" placeholder="e.g. 1234567"/></div>
+    <div style="display:flex;gap:.6rem;margin-top:1.1rem">
+      <button class="btn btn-primary" onclick="saveDraw()">Save Draw</button>
+      <button class="btn btn-secondary" onclick="closeModal('draw-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- USER MODAL -->
+<div id="user-modal" class="modal-back">
+  <div class="modal">
+    <h2 id="user-modal-title">Add Participant</h2>
+    <div class="form-row"><label>Name</label><input type="text" id="u-name" placeholder="Full name"/></div>
+    <div class="form-row"><label>WhatsApp Phone (E.164)</label><input type="tel" id="u-phone" placeholder="+353871234567"/></div>
+    <div class="form-row"><label>Assigned Teams (up to 3)</label><div class="tag-grid" id="team-picker"></div></div>
+    <div style="display:flex;gap:.6rem;margin-top:1.1rem">
+      <button class="btn btn-primary" onclick="saveUser()">Save</button>
+      <button class="btn btn-secondary" onclick="closeModal('user-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MATCH MODAL -->
+<div id="match-modal" class="modal-back">
+  <div class="modal">
+    <h2 id="match-modal-title">Add Match</h2>
+    <div class="form-2">
+      <div class="form-row" style="margin:0"><label>Date</label><input type="date" id="m-date"/></div>
+      <div class="form-row" style="margin:0"><label>Kick-off (Irish time)</label><input type="time" id="m-kickoff" value="15:00"/></div>
+    </div>
+    <div class="form-row" style="margin-top:.85rem"><label>Stage</label>
+      <select id="m-stage">
+        <option value="group">Group Stage</option>
+        <option value="round_of_32">Round of 32</option>
+        <option value="round_of_16">Round of 16</option>
+        <option value="quarter_final">Quarter Final</option>
+        <option value="semi_final">Semi Final</option>
+        <option value="third_place">Third Place</option>
+        <option value="final">Final</option>
+      </select>
+    </div>
+    <div class="form-2">
+      <div class="form-row" style="margin:0"><label>Home Team</label><select id="m-home"></select></div>
+      <div class="form-row" style="margin:0"><label>Away Team</label><select id="m-away"></select></div>
+    </div>
+    <div class="form-row" style="margin-top:.85rem"><label>Score (leave blank if not played)</label>
+      <div class="score-row">
+        <input type="number" id="m-hs" min="0" max="30" placeholder="–"/>
+        <span class="vs">vs</span>
+        <input type="number" id="m-as" min="0" max="30" placeholder="–"/>
+      </div>
+    </div>
+    <div class="form-row"><label>Venue (optional)</label><input type="text" id="m-venue" placeholder="MetLife Stadium, New Jersey"/></div>
+    <div style="display:flex;gap:.6rem;margin-top:1.1rem">
+      <button class="btn btn-primary" onclick="saveMatch()">Save</button>
+      <button class="btn btn-secondary" onclick="closeModal('match-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEAM MODAL -->
+<div id="team-modal" class="modal-back">
+  <div class="modal">
+    <h2>Add Team</h2>
+    <div class="form-2">
+      <div class="form-row" style="margin:0"><label>Flag Emoji</label><input type="text" id="t-flag" placeholder="🇮🇪"/></div>
+      <div class="form-row" style="margin:0"><label>ID (3 letters)</label><input type="text" id="t-id" placeholder="IRL" maxlength="4"/></div>
+    </div>
+    <div class="form-row" style="margin-top:.85rem"><label>Name</label><input type="text" id="t-name" placeholder="Ireland"/></div>
+    <div class="form-row"><label>Group (A–L)</label><input type="text" id="t-group" placeholder="A" maxlength="1"/></div>
+    <div style="display:flex;gap:.6rem;margin-top:1.1rem">
+      <button class="btn btn-primary" onclick="saveTeam()">Save</button>
+      <button class="btn btn-secondary" onclick="closeModal('team-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- PREVIEW MODAL -->
+<div id="preview-modal" class="modal-back">
+  <div class="modal" style="max-width:560px">
+    <h2>📱 Message Preview</h2>
+    <p id="preview-label" style="color:var(--muted);font-size:.8rem;margin-bottom:.6rem"></p>
+    <div class="preview-box" id="preview-content"></div>
+    <div style="display:flex;gap:.6rem;margin-top:1rem">
+      <button class="btn btn-gold" id="preview-send-btn">📤 Send to Group</button>
+      <button class="btn btn-secondary" onclick="closeModal('preview-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let allTeams=[], allMatches=[], allDraws=[], appConfig={};
+let activeDraw=null, editingUserId=null, editingMatchId=null, editingDrawId=null;
+
+const $ = id => document.getElementById(id);
+const api = async (method, url, body) => {
+  const r = await fetch(url, { method, headers:{'Content-Type':'application/json'}, body: body ? JSON.stringify(body) : undefined });
+  return r.json();
+};
+
+function toast(msg, dur=3000) {
+  const el=$('toast'); el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), dur);
+}
+
+function closeModal(id) { $(id).classList.remove('open'); }
+
+function stageStr(s) {
+  return {group:'Group Stage',round_of_32:'Round of 32',round_of_16:'Round of 16',quarter_final:'Quarter Final',semi_final:'Semi Final',third_place:'Third Place',final:'Final'}[s]||s;
+}
+
+// ── SECTION ROUTING ────────────────────────────────
+function showSection(name, btn) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-btn').forEach(b=>b.classList.remove('active'));
+  $('sec-'+name)?.classList.add('active');
+  if (btn) btn.classList.add('active');
+  else document.querySelectorAll(`[data-sec="${name}"]`).forEach(b=>b.classList.add('active'));
+  const loaders={overview:loadOverview,teams:loadTeams,matches:loadMatches,settings:loadSettings};
+  loaders[name]?.();
+}
+
+function showDraw(drawId) {
+  activeDraw = allDraws.find(d=>d.id===drawId);
+  if (!activeDraw) return;
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-btn,.draw-pill').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll(`[data-draw="${drawId}"]`).forEach(b=>b.classList.add('active'));
+  $('sec-draw').classList.add('active');
+  renderDrawPage();
+}
+
+// ── SIDEBAR DRAWS LIST ─────────────────────────────
+function renderSidebar() {
+  const el=$('draws-list');
+  el.innerHTML = allDraws.map(d=>`
+    <button class="draw-pill ${activeDraw?.id===d.id?'active':''}" data-draw="${d.id}" onclick="showDraw('${d.id}')">
+      <span>${d.name}</span>
+      <span class="pill-badge">${(d.users||[]).length}</span>
+    </button>`).join('');
+}
+
+// ── OVERVIEW ───────────────────────────────────────
+async function loadOverview() {
+  allDraws = await api('GET','/api/draws');
+  allTeams = await api('GET','/api/teams');
+  allMatches= await api('GET','/api/matches');
+  renderSidebar();
+
+  const playedCount = allMatches.filter(m=>m.played).length;
+  $('overview-stats').innerHTML = `
+    <div class="stat-card"><div class="val">${allDraws.length}</div><div class="lbl">Draws</div></div>
+    <div class="stat-card"><div class="val">${allDraws.reduce((a,d)=>a+(d.users||[]).length,0)}</div><div class="lbl">Total Players</div></div>
+    <div class="stat-card"><div class="val">${allTeams.length}</div><div class="lbl">Teams</div></div>
+    <div class="stat-card"><div class="val">${playedCount}</div><div class="lbl">Matches Played</div></div>`;
+
+  const tbody = $('overview-draws-table');
+  if (!allDraws.length) { tbody.innerHTML='<tr><td colspan="5" class="empty">No draws yet — create one in the sidebar</td></tr>'; return; }
+
+  const rows = await Promise.all(allDraws.map(async d => {
+    const lb = buildLeaderboardLocal(d);
+    const leader = lb[0] || null;
+    return `<tr>
+      <td><strong style="cursor:pointer;color:var(--g)" onclick="showDraw('${d.id}')">${d.name}</strong>
+        ${d.description?`<div style="font-size:.78rem;color:var(--muted)">${d.description}</div>`:''}
+      </td>
+      <td>${(d.users||[]).length}</td>
+      <td>${leader ? leader.name : '<span style="color:var(--muted)">—</span>'}</td>
+      <td>${leader ? `<strong>${leader.total}</strong> pts` : '—'}</td>
+      <td>
+        <button class="btn btn-secondary btn-sm" onclick="showDraw('${d.id}')">Open</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteDraw('${d.id}')">Delete</button>
+      </td>
+    </tr>`;
+  }));
+  tbody.innerHTML = rows.join('');
+}
+
+// ── DRAW PAGE ──────────────────────────────────────
+function buildLeaderboardLocal(draw) {
+  const { calcDrawStandings } = window; // fallback — uses server API
+  const tm = Object.fromEntries(allTeams.map(t=>[t.id,t]));
+  // simplified client-side calc
+  const pc = {group:{win:3,draw:1,loss:0},round_of_32:{win:4,loss:0},round_of_16:{win:6,loss:0},quarter_final:{win:10,loss:0},semi_final:{win:15,loss:0},third_place:{win:18,loss:0},final:{win:25,loss:12}};
+  const standings = (draw.users||[]).map(user=>{
+    let total=0;
+    const teams=(user.teams||[]).map(tid=>{
+      const team=tm[tid]; if(!team)return null;
+      let pts=0;
+      for(const m of allMatches){
+        if(!m.played)continue;
+        const isH=m.homeTeam===tid, isA=m.awayTeam===tid;
+        if(!isH&&!isA)continue;
+        const ts=isH?m.homeScore:m.awayScore, os=isH?m.awayScore:m.homeScore;
+        const res=ts>os?'win':ts<os?'loss':'draw';
+        const cfg=pc[m.stage]; if(cfg)pts+=cfg[res]||0;
+      }
+      total+=pts;
+      return {team,points:pts};
+    }).filter(Boolean);
+    return {user,teams,total};
+  }).sort((a,b)=>b.total-a.total);
+  return standings.map((s,i)=>({rank:i+1,id:s.user.id,name:s.user.name,phone:s.user.phone,teams:s.teams,total:s.total}));
+}
+
+async function renderDrawPage() {
+  const draw = activeDraw;
+  const tm = Object.fromEntries(allTeams.map(t=>[t.id,t]));
+  const today = new Date().toLocaleDateString('en-CA',{timeZone:'Europe/Dublin'});
+  const todayMatches = allMatches.filter(m=>m.date===today);
+  const lb = buildLeaderboardLocal(draw);
+
+  // Rivalries
+  const teamOwners={};
+  for(const u of draw.users||[]) for(const tid of u.teams||[]){if(!teamOwners[tid])teamOwners[tid]=[];teamOwners[tid].push(u.name.split(' ')[0]);}
+  const rivalries=[];
+  for(const m of todayMatches){if(m.played)continue;const ho=teamOwners[m.homeTeam],ao=teamOwners[m.awayTeam];if(ho?.length&&ao?.length){const h=tm[m.homeTeam],a=tm[m.awayTeam];if(h&&a)rivalries.push({h,ho,a,ao,t:m.kickoff});}}
+
+  const medals=['🥇','🥈','🥉'];
+
+  $('draw-content').innerHTML = `
+    <div class="draw-header">
+      <div class="page-title">${draw.name}</div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn btn-secondary btn-sm" onclick="openNewDrawModal('${draw.id}')">✏️ Edit</button>
+        <button class="btn btn-secondary btn-sm" onclick="previewMessage('${draw.id}')">👁 Preview</button>
+        <button class="btn btn-gold btn-sm" onclick="sendMessage('${draw.id}')">📤 Send to Group</button>
+        <button class="btn btn-primary btn-sm" onclick="openUserModal(null,'${draw.id}')">+ Add Participant</button>
+      </div>
+    </div>
+
+    ${rivalries.length?`<div class="rivalry-box"><strong>🔥 Draw Clashes Today!</strong><br>${rivalries.map(r=>`⚔️ ${r.h.flag} ${r.h.name} <em>(${r.ho.join('/')})</em> vs ${r.a.flag} ${r.a.name} <em>(${r.ao.join('/')})</em> — ⏰ ${r.t}`).join('<br>')}</div>`:''}
+
+    <div class="card" style="margin-bottom:1rem">
+      <h2>🏆 Standings</h2>
+      ${lb.length?`<table><thead><tr><th>Rank</th><th>Participant</th><th>Teams & Points</th><th>Total</th><th></th></tr></thead><tbody>
+        ${lb.map((row,i)=>{
+          const rc=i===0?'rk1':i===1?'rk2':i===2?'rk3':'rkn';
+          const medal=medals[i]||'';
+          const teamPills=(row.teams||[]).map(t=>`<span class="badge bg-green">${t.team.flag} ${t.team.name} · ${t.points}pts</span>`).join(' ');
+          return `<tr>
+            <td><span class="rank-badge ${rc}">${medal||(i+1)}</span></td>
+            <td><strong>${row.name}</strong></td>
+            <td style="line-height:1.9">${teamPills||'<span style="color:var(--muted);font-size:.8rem">No teams</span>'}</td>
+            <td><span class="pts-big">${row.total}</span></td>
+            <td>
+              <button class="btn btn-secondary btn-sm" onclick="openUserModal('${row.id}','${draw.id}')">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteUser('${row.id}','${draw.id}')">✕</button>
+            </td>
+          </tr>`;}).join('')}
+      </tbody></table>`:
+      `<div class="empty">No participants yet — click "Add Participant" to get started</div>`}
+    </div>
+
+    <div class="card">
+      <h2>⚙️ WhatsApp Group Config</h2>
+      <div class="info-yellow info-box" style="font-size:.8rem">
+        Add <strong>+34 644 80 21 26</strong> (CallMeBot) to your WhatsApp group, then send <code>I allow callmebot to send me messages</code> in the group to receive your Group ID and API key.
+      </div>
+      <div class="form-row"><label>CallMeBot Group ID</label>
+        <input type="text" id="draw-groupid-${draw.id}" value="${draw.group?.callmebot_group_id||''}" placeholder="e.g. 123456789@g.us"/></div>
+      <div class="form-row"><label>CallMeBot API Key</label>
+        <input type="text" id="draw-apikey-${draw.id}" value="${draw.group?.callmebot_apikey||''}" placeholder="e.g. 1234567"/></div>
+      <button class="btn btn-primary" onclick="saveDrawWhatsApp('${draw.id}')">Save WhatsApp Config</button>
+    </div>
+
+    <div class="card">
+      <h2>📅 Preview for Date</h2>
+      <div style="display:flex;gap:.5rem;align-items:center">
+        <input type="date" id="preview-date-${draw.id}" value="${today}" style="width:180px"/>
+        <button class="btn btn-secondary btn-sm" onclick="previewMessage('${draw.id}',true)">Preview</button>
+      </div>
+    </div>`;
+}
+
+// ── DRAW CRUD ──────────────────────────────────────
+function openNewDrawModal(id) {
+  editingDrawId = id || null;
+  const draw = id ? allDraws.find(d=>d.id===id) : null;
+  $('draw-modal-title').textContent = id ? 'Edit Draw' : 'New Draw';
+  $('dm-name').value = draw?.name||'';
+  $('dm-desc').value = draw?.description||'';
+  $('dm-groupid').value = draw?.group?.callmebot_group_id||'';
+  $('dm-apikey').value  = draw?.group?.callmebot_apikey||'';
+  $('draw-modal').classList.add('open');
+}
+
+async function saveDraw() {
+  const name=$('dm-name').value.trim();
+  if(!name){toast('Name required');return;}
+  const draws=[...allDraws];
+  const obj={
+    id: editingDrawId||('draw'+Date.now()),
+    name, description:$('dm-desc').value.trim(),
+    group:{callmebot_group_id:$('dm-groupid').value.trim(),callmebot_apikey:$('dm-apikey').value.trim()},
+    users: editingDrawId?(draws.find(d=>d.id===editingDrawId)?.users||[]):[]
+  };
+  if(editingDrawId){const i=draws.findIndex(d=>d.id===editingDrawId);draws[i]=obj;}
+  else draws.push(obj);
+  await api('POST','/api/draws',draws);
+  allDraws=draws;
+  closeModal('draw-modal');
+  renderSidebar();
+  toast('✅ Draw saved!');
+  if(editingDrawId&&activeDraw?.id===editingDrawId){activeDraw=obj;renderDrawPage();}
+  else loadOverview();
+}
+
+async function deleteDraw(id) {
+  if(!confirm('Delete this draw and all its participants?'))return;
+  const draws=allDraws.filter(d=>d.id!==id);
+  await api('POST','/api/draws',draws);
+  allDraws=draws;
+  if(activeDraw?.id===id){activeDraw=null;showSection('overview');}
+  renderSidebar();
+  loadOverview();
+  toast('Deleted');
+}
+
+async function saveDrawWhatsApp(drawId) {
+  const gid=$(`draw-groupid-${drawId}`)?.value.trim();
+  const key=$(`draw-apikey-${drawId}`)?.value.trim();
+  const draws=allDraws.map(d=>d.id===drawId?{...d,group:{callmebot_group_id:gid,callmebot_apikey:key}}:d);
+  await api('POST','/api/draws',draws);
+  allDraws=draws;
+  activeDraw=draws.find(d=>d.id===drawId);
+  toast('✅ WhatsApp config saved!');
+}
+
+// ── USER CRUD ──────────────────────────────────────
+function openUserModal(userId, drawId) {
+  editingUserId=userId||null;
+  const draw=allDraws.find(d=>d.id===drawId);
+  const user=userId?(draw?.users||[]).find(u=>u.id===userId):null;
+  $('user-modal-title').textContent=userId?'Edit Participant':'Add Participant';
+  $('u-name').value=user?.name||'';
+  $('u-phone').value=user?.phone||'';
+  $('user-modal').dataset.drawId=drawId;
+  const picker=$('team-picker');
+  picker.innerHTML=allTeams.map(t=>`<span class="tag ${user?.teams?.includes(t.id)?'selected':''}" data-id="${t.id}" onclick="toggleTag(this)">${t.flag} ${t.name} <span class="group-tag">${t.group}</span></span>`).join('');
+  $('user-modal').classList.add('open');
+}
+
+function toggleTag(el) {
+  const sel=document.querySelectorAll('#team-picker .tag.selected');
+  if(!el.classList.contains('selected')&&sel.length>=3){toast('Max 3 teams');return;}
+  el.classList.toggle('selected');
+}
+
+async function saveUser() {
+  const name=$('u-name').value.trim(), phone=$('u-phone').value.trim();
+  if(!name||!phone){toast('Name and phone required');return;}
+  const teams=[...document.querySelectorAll('#team-picker .tag.selected')].map(e=>e.dataset.id);
+  const drawId=$('user-modal').dataset.drawId;
+  const draws=allDraws.map(d=>{
+    if(d.id!==drawId)return d;
+    const users=[...(d.users||[])];
+    if(editingUserId){const i=users.findIndex(u=>u.id===editingUserId);users[i]={...users[i],name,phone,teams};}
+    else users.push({id:'u'+Date.now(),name,phone,teams});
+    return {...d,users};
+  });
+  await api('POST','/api/draws',draws);
+  allDraws=draws;
+  activeDraw=draws.find(d=>d.id===drawId);
+  closeModal('user-modal');
+  toast('✅ Saved!');
+  renderDrawPage();
+}
+
+async function deleteUser(userId,drawId){
+  if(!confirm('Remove this participant?'))return;
+  const draws=allDraws.map(d=>d.id===drawId?{...d,users:(d.users||[]).filter(u=>u.id!==userId)}:d);
+  await api('POST','/api/draws',draws);
+  allDraws=draws;
+  activeDraw=draws.find(d=>d.id===drawId);
+  renderDrawPage();
+  toast('Removed');
+}
+
+// ── TEAMS ──────────────────────────────────────────
+async function loadTeams() {
+  allTeams=await api('GET','/api/teams');
+  const groups={};
+  for(const t of allTeams){if(!groups[t.group])groups[t.group]=[];groups[t.group].push(t);}
+  const el=$('teams-by-group');
+  el.innerHTML=Object.entries(groups).sort(([a],[b])=>a.localeCompare(b)).map(([g,teams])=>`
+    <div style="border:1px solid var(--border);border-radius:8px;padding:.85rem">
+      <div style="font-weight:bold;color:var(--gD);margin-bottom:.5rem;font-size:.9rem">Group ${g}</div>
+      ${teams.map(t=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:.25rem 0;border-bottom:1px solid var(--border);font-size:.85rem">
+        <span>${t.flag} ${t.name} <span style="color:var(--muted);font-size:.72rem">#${t.fifaRank||'?'}</span></span>
+        <button class="btn btn-danger btn-sm" style="padding:.15rem .45rem" onclick="deleteTeam('${t.id}')">✕</button>
+      </div>`).join('')}
+    </div>`).join('');
+}
+
+function openTeamModal(){['t-flag','t-name','t-id','t-group'].forEach(id=>$(id).value='');$('team-modal').classList.add('open');}
+
+async function saveTeam(){
+  const flag=$('t-flag').value.trim(),name=$('t-name').value.trim(),id=$('t-id').value.trim().toUpperCase(),group=$('t-group').value.trim().toUpperCase();
+  if(!flag||!name||!id||!group){toast('All fields required');return;}
+  await api('POST','/api/teams',[...allTeams,{id,name,group,flag,fifaRank:0}]);
+  allTeams=await api('GET','/api/teams');
+  closeModal('team-modal');toast('✅ Team added!');loadTeams();
+}
+
+async function deleteTeam(id){
+  if(!confirm('Delete this team?'))return;
+  await api('POST','/api/teams',allTeams.filter(t=>t.id!==id));
+  allTeams=await api('GET','/api/teams');
+  toast('Removed');loadTeams();
+}
+
+// ── MATCHES ────────────────────────────────────────
+async function loadMatches(){
+  allMatches=await api('GET','/api/matches');
+  allTeams=await api('GET','/api/teams');
+  const cfg=await api('GET','/api/config');
+  $('sync-status').innerHTML = cfg.api_football?.api_key
+    ? `✅ API-Football connected · Last synced: <strong>${cfg.api_football.last_synced?new Date(cfg.api_football.last_synced).toLocaleString('en-IE'):'Never'}</strong>`
+    : `⚠️ API-Football key not set — results must be entered manually. Add your key in <a href="#" onclick="showSection('settings')">Settings</a>.`;
+  const tm=Object.fromEntries(allTeams.map(t=>[t.id,t]));
+  const sorted=[...allMatches].sort((a,b)=>(a.date+a.kickoff).localeCompare(b.date+b.kickoff));
+  const tbody=$('matches-body');
+  if(!sorted.length){tbody.innerHTML='<tr><td colspan="9" class="empty">No fixtures yet</td></tr>';return;}
+  tbody.innerHTML=sorted.map(m=>{
+    const h=tm[m.homeTeam]||{flag:'?',name:m.homeTeam},a=tm[m.awayTeam]||{flag:'?',name:m.awayTeam};
+    const score=m.played?`<strong>${m.homeScore}–${m.awayScore}</strong>`:`<span style="color:var(--muted)">vs</span>`;
+    const status=m.played?`<span class="badge bg-green">✓</span>`:`<span class="badge bg-gray">Upcoming</span>`;
+    return `<tr>
+      <td style="font-size:.82rem">${m.date}</td>
+      <td><span class="kp">⏰${m.kickoff||'?'}</span></td>
+      <td><span class="badge bg-gold" style="font-size:.72rem">${stageStr(m.stage)}</span></td>
+      <td>${h.flag} ${h.name}</td>
+      <td style="text-align:center">${score}</td>
+      <td>${a.flag} ${a.name}</td>
+      <td style="font-size:.75rem;color:var(--muted)">${m.venue||''}</td>
+      <td>${status}</td>
+      <td>
+        <button class="btn btn-secondary btn-sm" onclick="openMatchModal('${m.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteMatch('${m.id}')">✕</button>
+      </td>
+    </tr>`;}).join('');
+}
+
+function openMatchModal(id){
+  editingMatchId=id||null;
+  const m=id?allMatches.find(x=>x.id===id):null;
+  $('match-modal-title').textContent=id?'Edit Match':'Add Match';
+  const opts=allTeams.map(t=>`<option value="${t.id}">${t.flag} ${t.name} (${t.group})</option>`).join('');
+  $('m-home').innerHTML=opts; $('m-away').innerHTML=opts;
+  $('m-date').value=m?.date||new Date().toLocaleDateString('en-CA',{timeZone:'Europe/Dublin'});
+  $('m-kickoff').value=m?.kickoff||'15:00';
+  $('m-stage').value=m?.stage||'group';
+  $('m-venue').value=m?.venue||'';
+  if(m){$('m-home').value=m.homeTeam;$('m-away').value=m.awayTeam;$('m-hs').value=m.homeScore??'';$('m-as').value=m.awayScore??'';}
+  else{$('m-hs').value='';$('m-as').value='';}
+  $('match-modal').classList.add('open');
+}
+
+async function saveMatch(){
+  const date=$('m-date').value,kickoff=$('m-kickoff').value,stage=$('m-stage').value;
+  const homeTeam=$('m-home').value,awayTeam=$('m-away').value;
+  const hs=$('m-hs').value,as_=$('m-as').value;
+  const played=hs!==''&&as_!=='';
+  const obj={id:editingMatchId||('m'+Date.now()),date,kickoff,stage,homeTeam,awayTeam,
+    homeScore:played?parseInt(hs):null,awayScore:played?parseInt(as_):null,played,venue:$('m-venue').value.trim()};
+  const matches=editingMatchId?allMatches.map(m=>m.id===editingMatchId?obj:m):[...allMatches,obj];
+  await api('POST','/api/matches',matches);
+  allMatches=matches;
+  closeModal('match-modal');toast('✅ Match saved!');loadMatches();
+}
+
+async function deleteMatch(id){
+  if(!confirm('Delete this match?'))return;
+  await api('POST','/api/matches',allMatches.filter(m=>m.id!==id));
+  allMatches=allMatches.filter(m=>m.id!==id);
+  toast('Removed');loadMatches();
+}
+
+// ── MESSAGING ──────────────────────────────────────
+async function previewMessage(drawId, useDate=false) {
+  const dateInput=$(`preview-date-${drawId}`);
+  const date=useDate&&dateInput?dateInput.value:undefined;
+  const data=await api('POST','/api/preview',{drawId,date});
+  if(data.error){toast('❌ '+data.error);return;}
+  const draw=allDraws.find(d=>d.id===drawId);
+  $('preview-label').textContent=`Draw: ${draw?.name} · Date: ${data.date}`;
+  $('preview-content').textContent=data.message;
+  $('preview-send-btn').onclick=()=>{sendMessage(drawId);closeModal('preview-modal');};
+  $('preview-modal').classList.add('open');
+}
+
+async function sendMessage(drawId){
+  const draw=allDraws.find(d=>d.id===drawId);
+  if(!draw?.group?.callmebot_group_id||!draw?.group?.callmebot_apikey){
+    toast('⚠️ WhatsApp group not configured for this draw');return;
+  }
+  const data=await api('POST','/api/send',{drawId});
+  toast(data.sent?`✅ Sent to "${draw.name}" group!`:`❌ Failed: ${data.result?.error||data.result?.body||'Unknown'}`);
+}
+
+// ── SYNC ──────────────────────────────────────────
+async function syncToday(){
+  toast('🔄 Syncing today\'s fixtures...');
+  const r=await api('POST','/api/sync-today',{});
+  if(r.error)toast('❌ '+r.error);
+  else{toast(`✅ Synced ${r.synced} fixture(s) for today`);allMatches=await api('GET','/api/matches');if(activeDraw)renderDrawPage();}
+}
+
+async function syncAll(){
+  const cfg=await api('GET','/api/config');
+  if(!cfg.api_football?.api_key){toast('⚠️ Set API-Football key in Settings first');showSection('settings');return;}
+  toast('🔄 Syncing all fixtures (may take a moment)...');
+  const r=await api('POST','/api/sync-all',{});
+  if(r.error)toast('❌ '+r.error);
+  else{toast(`✅ Synced ${r.synced} total fixtures`);allMatches=await api('GET','/api/matches');}
+}
+
+// ── SETTINGS ──────────────────────────────────────
+async function loadSettings(){
+  appConfig=await api('GET','/api/config');
+  $('cfg-apikey').value=appConfig.api_football?.api_key||'';
+  const ls=appConfig.api_football?.last_synced;
+  $('last-synced').textContent=ls?`Last synced: ${new Date(ls).toLocaleString('en-IE')}`:'Never synced';
+}
+
+async function saveConfig(){
+  const key=$('cfg-apikey').value.trim();
+  const cfg={...appConfig,api_football:{...appConfig.api_football,api_key:key}};
+  await api('POST','/api/config',cfg);
+  appConfig=cfg;
+  toast('✅ Settings saved!');
+}
+
+// ── INIT ──────────────────────────────────────────
+(async()=>{
+  allTeams=await api('GET','/api/teams');
+  allMatches=await api('GET','/api/matches');
+  allDraws=await api('GET','/api/draws');
+  renderSidebar();
+  loadOverview();
+})();
+</script>
+</body>
+</html>

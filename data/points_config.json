@@ -1,0 +1,9 @@
+{
+  "group":         { "win": 3, "draw": 1, "loss": 0 },
+  "round_of_32":   { "win": 4, "loss": 0 },
+  "round_of_16":   { "win": 6, "loss": 0 },
+  "quarter_final": { "win": 10, "loss": 0 },
+  "semi_final":    { "win": 15, "loss": 0 },
+  "third_place":   { "win": 18, "loss": 0 },
+  "final":         { "win": 25, "loss": 12 }
+}

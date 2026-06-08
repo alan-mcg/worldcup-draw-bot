@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Live data — contains API keys, phone numbers, personal info
+data/config.json
+data/draws.json
+data/matches.json
+
+# Keep these tracked (safe, no secrets)
+!data/config.example.json
+!data/draws.example.json
+!data/teams.json
+!data/points_config.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.env
+*.log
+.vscode/
+.idea/
