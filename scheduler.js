@@ -1,15 +1,29 @@
-// scheduler.js — auto-sends to all groups daily + syncs fixtures from API-Football
+// scheduler.js — auto-sends to all groups daily + syncs live scores from ESPN
 // node scheduler.js  (keep running, use pm2 in production)
 
 const cron = require('node-cron');
+const path = require('path');
+const fs   = require('fs');
 const { execSync } = require('child_process');
 
-const SEND_SCHEDULE = '0 20 * * *';   // 8:00 PM daily
-const SYNC_SCHEDULE = '0 */2 * * *';  // Sync fixtures every 2 hours during tournament
+const SYNC_SCHEDULE = '0 */2 * * *'; // Sync scores every 2 hours during tournament
+
+// Read send_time from config.json so there's one place to change it
+function getSendSchedule() {
+  try {
+    const config = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'config.json'), 'utf8'));
+    const [hour, minute] = (config.send_time || '09:00').split(':');
+    return `${parseInt(minute, 10)} ${parseInt(hour, 10)} * * *`;
+  } catch {
+    return '0 9 * * *'; // fallback: 9am
+  }
+}
+
+const sendSchedule = getSendSchedule();
 
 console.log('⏰ World Cup Bot Scheduler started');
-console.log('   📤 Sends at 8pm every day');
-console.log('   🔄 Syncs API-Football every 2 hours');
+console.log(`   📤 Sends daily at ${JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'config.json'), 'utf8')).send_time || '09:00'}`);
+console.log('   🔄 Syncs ESPN scores every 2 hours');
 console.log('   Use Ctrl+C to stop, or pm2 to run in background\n');
 
 cron.schedule(SYNC_SCHEDULE, () => {
@@ -18,7 +32,7 @@ cron.schedule(SYNC_SCHEDULE, () => {
   catch (e) { console.error('Sync error:', e.message); }
 });
 
-cron.schedule(SEND_SCHEDULE, () => {
+cron.schedule(sendSchedule, () => {
   console.log(`\n🚀 [${new Date().toLocaleString()}] Sending daily updates...`);
   try { execSync('node bot.js', { stdio: 'inherit' }); }
   catch (e) { console.error('Bot error:', e.message); }

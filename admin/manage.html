@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>⚽ Manage Draw — World Cup 2026</title>
+<style>
+:root{
+  --g:#16a34a;--gL:#dcfce7;--gS:#f0fdf4;--gD:#15803d;--gDD:#14532d;
+  --gold:#d97706;--goldL:#fef3c7;
+  --red:#dc2626;--blue:#2563eb;--blueL:#dbeafe;
+  --bg:#f8fafc;--card:#fff;--border:#e2e8f0;
+  --text:#0f172a;--text2:#1e293b;--muted:#64748b;
+  --r:12px;
+  --shadow:0 1px 3px rgba(0,0,0,.07),0 4px 14px rgba(0,0,0,.06);
+  --shadow-lg:0 4px 6px rgba(0,0,0,.07),0 12px 36px rgba(0,0,0,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5}
+
+/* ── PIN GATE ─────────────────────────────────── */
+.gate{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;
+  background:linear-gradient(160deg,#d1fae5 0%,#ecfdf5 25%,#f8fafc 65%,#f1f5f9 100%);
+}
+.gate-card{
+  background:var(--card);border-radius:16px;padding:2.5rem 2.25rem;
+  max-width:360px;width:100%;text-align:center;
+  box-shadow:var(--shadow-lg);border:1px solid rgba(226,232,240,.6);
+}
+.gate-card .logo{font-size:2.8rem;margin-bottom:.5rem;line-height:1}
+.gate-card h1{color:var(--text);font-size:1.35rem;font-weight:700;margin-bottom:.25rem;letter-spacing:-.2px}
+.gate-card .sub{color:var(--muted);font-size:.875rem;margin-bottom:1.75rem;line-height:1.5}
+.pin-input{
+  letter-spacing:.5rem;font-size:1.75rem;text-align:center;
+  border:1.5px solid var(--border);border-radius:10px;
+  padding:.65rem .5rem;width:100%;font-family:inherit;
+  margin-bottom:.875rem;background:#fff;color:var(--text);
+  transition:border-color .15s,box-shadow .15s;
+}
+.pin-input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,74,.15)}
+.gate-btn{
+  background:var(--g);color:#fff;border:none;border-radius:8px;
+  padding:.65rem;font-size:.95rem;font-family:inherit;font-weight:600;
+  cursor:pointer;width:100%;transition:.2s;
+}
+.gate-btn:hover{background:var(--gD);transform:translateY(-1px);box-shadow:0 4px 14px rgba(22,163,74,.3)}
+.gate-err{color:var(--red);font-size:.83rem;margin-top:.65rem;min-height:1.2rem}
+
+/* ── APP ─────────────────────────────────────── */
+.app{display:none}
+.app.show{display:block}
+header{
+  background:linear-gradient(135deg,#07130a,var(--gDD),var(--gD));
+  color:#fff;padding:1rem 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  box-shadow:0 1px 0 rgba(0,0,0,.2),0 2px 8px rgba(0,0,0,.12);
+}
+header h1{font-size:1.1rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.15px}
+header .meta{font-size:.75rem;opacity:.7;margin-top:.15rem}
+.signout{
+  background:rgba(255,255,255,.1);color:rgba(255,255,255,.9);
+  border:1px solid rgba(255,255,255,.2);border-radius:6px;
+  padding:.35rem .875rem;font-size:.8rem;cursor:pointer;font-family:inherit;
+  white-space:nowrap;flex-shrink:0;transition:.15s;font-weight:500;
+}
+.signout:hover{background:rgba(255,255,255,.22);color:#fff}
+
+/* ── TABS ─────────────────────────────────────── */
+.tabs{
+  display:flex;border-bottom:1px solid var(--border);
+  background:var(--card);padding:0 1.5rem;overflow-x:auto;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+.tab{
+  padding:.8rem 1.1rem;font-size:.875rem;cursor:pointer;
+  border-bottom:2.5px solid transparent;margin-bottom:-1px;
+  color:var(--muted);font-family:inherit;background:none;
+  border-top:none;border-left:none;border-right:none;
+  white-space:nowrap;font-weight:500;transition:.15s;
+}
+.tab:hover{color:var(--text2)}
+.tab.active{color:var(--g);border-bottom-color:var(--g);font-weight:600}
+
+main{padding:1.75rem;max-width:880px}
+.section{display:none}.section.active{display:block}
+
+/* ── CARDS ───────────────────────────────────── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;margin-bottom:1.25rem;box-shadow:var(--shadow)}
+.card h2{font-size:.95rem;color:var(--text2);font-weight:600;margin-bottom:.95rem}
+
+/* ── TABLE ───────────────────────────────────── */
+table{width:100%;border-collapse:collapse;font-size:.87rem}
+th{text-align:left;padding:.5rem .75rem;background:var(--bg);color:var(--muted);font-size:.71rem;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+td{padding:.7rem .75rem;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafafa}
+
+/* ── BUTTONS ─────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:4px;padding:.42rem .9rem;border-radius:8px;border:1.5px solid;cursor:pointer;font-size:.82rem;font-family:inherit;font-weight:500;transition:.15s}
+.btn-sm{padding:.28rem .6rem;font-size:.76rem}
+.btn-green{background:var(--g);color:#fff;border-color:var(--g)}.btn-green:hover{background:var(--gD);border-color:var(--gD)}
+.btn-secondary{background:#fff;color:var(--g);border-color:#c8e6d4}.btn-secondary:hover{background:var(--gL);border-color:var(--g)}
+.btn-danger{background:#fff;color:var(--red);border-color:#fca5a5}.btn-danger:hover{background:#fef2f2;border-color:var(--red)}
+.btn-gold{background:var(--gold);color:#fff;border-color:var(--gold)}.btn-gold:hover{background:#b45309}
+
+/* ── FORM ────────────────────────────────────── */
+.form-row{margin-bottom:1rem}
+.form-row label{display:block;font-size:.73rem;color:var(--muted);margin-bottom:.3rem;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+input[type=text],input[type=tel],input[type=date]{
+  border:1.5px solid var(--border);border-radius:8px;padding:.5rem .75rem;
+  font-size:.88rem;font-family:inherit;background:#fff;color:var(--text);width:100%;
+  transition:border-color .15s,box-shadow .15s;
+}
+input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,74,.12)}
+
+/* ── TEAM TAGS ───────────────────────────────── */
+.tag-grid{display:flex;flex-wrap:wrap;gap:.3rem;max-height:200px;overflow-y:auto;border:1.5px solid var(--border);border-radius:8px;padding:.5rem}
+.tag{display:inline-flex;align-items:center;gap:2px;padding:.22rem .55rem;border-radius:20px;font-size:.76rem;background:var(--gS);color:var(--gD);cursor:pointer;border:1.5px solid transparent;transition:.12s;user-select:none;font-weight:500}
+.tag:hover:not(.taken){border-color:var(--g)}
+.tag.selected{border-color:var(--g);background:var(--g);color:#fff}
+.tag.taken{background:#f1f5f9;color:#94a3b8;cursor:default}
+
+/* ── MODAL ───────────────────────────────────── */
+.modal-back{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.modal-back.open{display:flex}
+.modal{background:#fff;border-radius:14px;padding:1.75rem;max-width:490px;width:92%;max-height:88vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.2)}
+.modal h2{font-size:1rem;color:var(--text);font-weight:700;margin-bottom:1.1rem}
+
+/* ── PREVIEW BOX ─────────────────────────────── */
+.preview-box{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:1.1rem;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.79rem;white-space:pre-wrap;max-height:420px;overflow-y:auto;line-height:1.7;margin-top:.875rem}
+
+/* ── MISC ────────────────────────────────────── */
+.toolbar{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.1rem;align-items:center}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--text);color:#fff;padding:.65rem 1.1rem;border-radius:10px;font-size:.85rem;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.22)}
+.toast.show{opacity:1}
+.info-box{padding:.9rem 1.1rem;border-radius:10px;font-size:.84rem;line-height:1.7;margin-bottom:1rem}
+.info-yellow{background:#fffbeb;border:1px solid #fde68a}
+.info-blue{background:var(--blueL);border:1px solid #bfdbfe}
+.info-box code{background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px;font-size:.8rem}
+.team-pill{display:inline-flex;align-items:center;gap:2px;background:var(--gL);color:var(--gD);border-radius:20px;padding:.12rem .5rem;font-size:.73rem;margin:.1rem;font-weight:500}
+.empty{text-align:center;color:var(--muted);padding:2rem;font-style:italic}
+</style>
+</head>
+<body>
+
+<!-- ── PIN GATE ─────────────────────────────────────── -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="logo">⚽</div>
+    <h1 id="gate-title">World Cup Draw</h1>
+    <p class="sub">Enter your PIN to manage this draw</p>
+    <input class="pin-input" type="password" id="pin-input" maxlength="6"
+           inputmode="numeric" placeholder="••••••"
+           onkeydown="if(event.key==='Enter')submitPin()"/>
+    <button class="gate-btn" onclick="submitPin()">Enter →</button>
+    <p class="gate-err" id="gate-err"></p>
+  </div>
+</div>
+
+<!-- ── APP ────────────────────────────────────────────── -->
+<div class="app" id="app">
+  <header>
+    <div style="min-width:0">
+      <h1 id="app-title">Draw</h1>
+      <div class="meta" id="app-meta"></div>
+    </div>
+    <button class="signout" onclick="signOut()">Sign out</button>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('participants',this)">👥 Participants</button>
+    <button class="tab" onclick="showTab('whatsapp',this)">📱 WhatsApp</button>
+    <button class="tab" onclick="showTab('preview',this)">📋 Preview &amp; Send</button>
+  </div>
+
+  <main>
+    <!-- PARTICIPANTS -->
+    <div class="section active" id="sec-participants">
+      <div class="toolbar">
+        <button class="btn btn-green" onclick="openPModal()">+ Add Participant</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table>
+          <thead><tr><th>Name</th><th>Teams Assigned</th><th></th></tr></thead>
+          <tbody id="p-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- WHATSAPP -->
+    <div class="section" id="sec-whatsapp">
+      <div class="card">
+        <h2>📱 WhatsApp Group Setup</h2>
+        <div class="info-yellow info-box">
+          Add <strong>+34 644 80 21 26</strong> (CallMeBot) to your WhatsApp group, then send
+          <code>I allow callmebot to send me messages</code>
+          in the group to receive your Group ID and API key.
+        </div>
+        <div class="form-row"><label>Group ID</label><input type="text" id="wa-gid" placeholder="e.g. 123456789@g.us"/></div>
+        <div class="form-row"><label>API Key</label><input type="text" id="wa-key" placeholder="e.g. 1234567"/></div>
+        <div style="display:flex;gap:.5rem;margin-top:.875rem;flex-wrap:wrap">
+          <button class="btn btn-green" onclick="saveWhatsApp()">💾 Save</button>
+          <button class="btn btn-secondary" onclick="sendTest()">📤 Send Test Message</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREVIEW & SEND -->
+    <div class="section" id="sec-preview">
+      <div class="card">
+        <h2>📋 Preview &amp; Send</h2>
+        <div class="info-blue info-box">
+          The daily message sends automatically every morning. Use this to preview or trigger it early.
+        </div>
+        <div class="toolbar">
+          <input type="date" id="prev-date" style="width:auto"/>
+          <button class="btn btn-secondary" onclick="previewMsg()">Preview</button>
+          <button class="btn btn-gold" onclick="sendNow()">📤 Send Now</button>
+        </div>
+        <div id="prev-box" class="preview-box" style="display:none"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- PARTICIPANT MODAL -->
+<div class="modal-back" id="p-modal">
+  <div class="modal">
+    <h2 id="pm-title">Add Participant</h2>
+    <div class="form-row">
+      <label>Name</label>
+      <input type="text" id="pm-name" placeholder="e.g. Dave O'Brien"/>
+    </div>
+    <div class="form-row">
+      <label>WhatsApp Number <span style="font-weight:normal;text-transform:none;letter-spacing:0;font-size:.78rem">(optional)</span></label>
+      <input type="tel" id="pm-phone" placeholder="+353871234567"/>
+    </div>
+    <div class="form-row">
+      <label>Teams — select up to 3</label>
+      <div class="tag-grid" id="pm-teams"></div>
+    </div>
+    <div style="display:flex;gap:.5rem;margin-top:1.1rem">
+      <button class="btn btn-green" onclick="saveParticipant()">Save</button>
+      <button class="btn btn-secondary" onclick="closePModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const slug   = location.pathname.replace(/^\/manage\//, '').replace(/\/$/, '');
+const PINKEY = 'wc_pin_' + slug;
+let   pin    = sessionStorage.getItem(PINKEY);
+let   draw   = null;
+let   teams  = [];
+let   editId = null;
+
+// ── BOOT ─────────────────────────────────────────────
+(async () => {
+  // Humanise the slug as a placeholder title in the gate
+  document.getElementById('gate-title').textContent =
+    slug.replace(/-/g, ' ').replace(/\b./g, c => c.toUpperCase());
+
+  teams = await fetch('/api/teams').then(r => r.json());
+
+  if (pin && !await enter(pin)) {
+    sessionStorage.removeItem(PINKEY);
+    pin = null;
+  }
+  if (!pin) showGate();
+})();
+
+// ── PIN GATE ─────────────────────────────────────────
+function showGate() {
+  document.getElementById('gate').style.display = 'flex';
+  document.getElementById('app').classList.remove('show');
+  setTimeout(() => document.getElementById('pin-input').focus(), 100);
+}
+
+async function submitPin() {
+  const val = document.getElementById('pin-input').value;
+  document.getElementById('gate-err').textContent = '';
+  if (!/^\d{6}$/.test(val)) { document.getElementById('gate-err').textContent = 'Enter your 6-digit PIN'; return; }
+  if (await enter(val)) { pin = val; sessionStorage.setItem(PINKEY, pin); }
+  else document.getElementById('gate-err').textContent = 'Incorrect PIN';
+}
+
+async function enter(tryPin) {
+  const r = await fetch(`/api/manage/${slug}/verify`, {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({pin: tryPin})
+  }).then(r => r.json());
+  if (!r.ok) return false;
+  await loadApp();
+  return true;
+}
+
+function signOut() {
+  sessionStorage.removeItem(PINKEY);
+  pin = null; draw = null;
+  document.getElementById('pin-input').value = '';
+  showGate();
+}
+
+// ── APP LOAD ─────────────────────────────────────────
+async function loadApp() {
+  draw = await post('data', {});
+  if (draw.error) { signOut(); return; }
+
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('app').classList.add('show');
+  document.getElementById('app-title').textContent = draw.name;
+  updateMeta();
+
+  document.getElementById('wa-gid').value  = draw.group?.callmebot_group_id || '';
+  document.getElementById('wa-key').value  = draw.group?.callmebot_apikey   || '';
+  document.getElementById('prev-date').value =
+    new Date().toLocaleDateString('en-CA', {timeZone:'Europe/Dublin'});
+
+  renderParticipants();
+}
+
+function updateMeta() {
+  const n = (draw.users || []).length;
+  document.getElementById('app-meta').textContent = n + ' participant' + (n !== 1 ? 's' : '');
+}
+
+// ── TABS ─────────────────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── PARTICIPANTS ──────────────────────────────────────
+function renderParticipants() {
+  updateMeta();
+  const tbody = document.getElementById('p-body');
+  const users = draw.users || [];
+  if (!users.length) {
+    tbody.innerHTML = '<tr><td colspan="3" class="empty">No participants yet — add the first one above</td></tr>';
+    return;
+  }
+  const tmap = Object.fromEntries(teams.map(t => [t.id, t]));
+  tbody.innerHTML = users.map(u => {
+    const pills = (u.teams || []).map(id => {
+      const t = tmap[id];
+      return `<span class="team-pill">${t ? t.flag + ' ' + t.name : id}</span>`;
+    }).join('') || '<span style="color:var(--muted);font-style:italic;font-size:.78rem">None assigned</span>';
+    return `<tr>
+      <td><strong>${esc(u.name)}</strong>${u.phone ? `<br><small style="color:var(--muted)">${esc(u.phone)}</small>` : ''}</td>
+      <td>${pills}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-sm btn-secondary" onclick="openPModal('${u.id}')">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="removeP('${u.id}')">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function assignedTeams(excludeId) {
+  return new Set((draw.users || []).filter(u => u.id !== excludeId).flatMap(u => u.teams || []));
+}
+
+function openPModal(uid = null) {
+  editId = uid;
+  const user = uid ? (draw.users || []).find(u => u.id === uid) : null;
+  document.getElementById('pm-title').textContent = uid ? 'Edit Participant' : 'Add Participant';
+  document.getElementById('pm-name').value  = user?.name  || '';
+  document.getElementById('pm-phone').value = user?.phone || '';
+
+  const taken    = assignedTeams(uid);
+  const selected = new Set(user?.teams || []);
+  document.getElementById('pm-teams').innerHTML = teams.map(t => {
+    const cls = taken.has(t.id) ? 'tag taken' : (selected.has(t.id) ? 'tag selected' : 'tag');
+    return `<span class="${cls}" data-id="${t.id}" onclick="toggleTeam(this,'${t.id}',${taken.has(t.id)})">${t.flag} ${t.name}</span>`;
+  }).join('');
+
+  document.getElementById('p-modal').classList.add('open');
+  setTimeout(() => document.getElementById('pm-name').focus(), 80);
+}
+
+function toggleTeam(el, id, isTaken) {
+  if (isTaken) return;
+  if (el.classList.contains('selected')) { el.classList.remove('selected'); return; }
+  if (document.querySelectorAll('#pm-teams .tag.selected').length >= 3) { toast('Maximum 3 teams per participant'); return; }
+  el.classList.add('selected');
+}
+
+async function saveParticipant() {
+  const name  = document.getElementById('pm-name').value.trim();
+  const phone = document.getElementById('pm-phone').value.trim();
+  const selTeams = [...document.querySelectorAll('#pm-teams .tag.selected')].map(e => e.dataset.id);
+  if (!name) { toast('Enter a name'); return; }
+
+  const user = { id: editId || ('u' + Date.now()), name, phone, teams: selTeams };
+  draw.users = editId
+    ? (draw.users || []).map(u => u.id === editId ? user : u)
+    : [...(draw.users || []), user];
+
+  await save();
+  closePModal();
+  renderParticipants();
+  toast(editId ? '✅ Participant updated' : '✅ Participant added');
+}
+
+async function removeP(id) {
+  if (!confirm('Remove this participant?')) return;
+  draw.users = (draw.users || []).filter(u => u.id !== id);
+  await save();
+  renderParticipants();
+  toast('Removed');
+}
+
+function closePModal() { document.getElementById('p-modal').classList.remove('open'); editId = null; }
+
+// ── WHATSAPP ──────────────────────────────────────────
+async function saveWhatsApp() {
+  draw.group = {
+    callmebot_group_id: document.getElementById('wa-gid').value.trim(),
+    callmebot_apikey:   document.getElementById('wa-key').value.trim()
+  };
+  await save();
+  toast('✅ WhatsApp config saved');
+}
+
+async function sendTest() {
+  await saveWhatsApp();
+  const r = await post('send', {});
+  toast(r.sent ? '✅ Test message sent!' : '❌ Failed — check Group ID and API key');
+}
+
+// ── PREVIEW ───────────────────────────────────────────
+async function previewMsg() {
+  const date = document.getElementById('prev-date').value;
+  const r    = await post('preview', {date});
+  if (r.error) { toast('❌ ' + r.error); return; }
+  const box  = document.getElementById('prev-box');
+  box.textContent = r.message;
+  box.style.display = 'block';
+}
+
+async function sendNow() {
+  const r = await post('send', {});
+  toast(r.sent ? '✅ Message sent to group!' : '❌ Failed — check WhatsApp config in the WhatsApp tab');
+}
+
+// ── HELPERS ───────────────────────────────────────────
+async function save() {
+  await post('save', {name: draw.name, description: draw.description, users: draw.users, group: draw.group});
+}
+
+async function post(action, body) {
+  const r = await fetch(`/api/manage/${slug}/${action}`, {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({pin, ...body})
+  });
+  return r.json();
+}
+
+let toastT;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

@@ -1,11 +1,5 @@
 {
-  "api_football": {
-    "api_key": "",
-    "league_id": 1,
-    "season": 2026,
-    "auto_sync": false,
-    "last_synced": null
-  },
   "timezone": "Europe/Dublin",
-  "send_time": "20:00"
+  "send_time": "09:00",
+  "last_synced": null
 }

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Create a Draw — World Cup 2026</title>
+<style>
+:root{
+  --g:#16a34a;--gL:#dcfce7;--gS:#f0fdf4;--gD:#15803d;--gDD:#14532d;
+  --red:#dc2626;--border:#e2e8f0;--text:#0f172a;--text2:#1e293b;--muted:#64748b;
+  --r:14px;
+  --shadow:0 4px 6px rgba(0,0,0,.06),0 12px 32px rgba(0,0,0,.1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:1.5rem;
+  background:linear-gradient(160deg,#d1fae5 0%,#ecfdf5 25%,#f8fafc 65%,#f1f5f9 100%);
+}
+.card{
+  background:#fff;border-radius:var(--r);padding:2.5rem 2.25rem;
+  max-width:460px;width:100%;
+  box-shadow:var(--shadow);
+  border:1px solid rgba(226,232,240,.6);
+}
+.logo{font-size:3rem;text-align:center;margin-bottom:.4rem;line-height:1}
+h1{text-align:center;color:var(--text);font-size:1.55rem;font-weight:700;letter-spacing:-.3px;margin-bottom:.3rem}
+.sub{text-align:center;color:var(--muted);font-size:.875rem;margin-bottom:2rem;line-height:1.55}
+.divider{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
+.form-row{margin-bottom:1.2rem}
+.form-row label{display:block;font-size:.72rem;color:var(--muted);margin-bottom:.3rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.form-row .hint{font-size:.78rem;color:var(--muted);margin-top:.3rem;line-height:1.5}
+input{
+  border:1.5px solid var(--border);border-radius:8px;
+  padding:.6rem .875rem;font-size:.95rem;font-family:inherit;
+  width:100%;background:#fff;color:var(--text);
+  transition:border-color .15s,box-shadow .15s;
+}
+input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,74,.15)}
+.btn{
+  width:100%;padding:.7rem;background:var(--g);color:#fff;
+  border:none;border-radius:8px;font-size:.95rem;font-family:inherit;
+  font-weight:600;cursor:pointer;transition:.2s;
+  display:flex;align-items:center;justify-content:center;gap:.4rem;margin-top:.75rem;
+}
+.btn:hover:not(:disabled){background:var(--gD);transform:translateY(-1px);box-shadow:0 6px 18px rgba(22,163,74,.3)}
+.btn:disabled{opacity:.65;cursor:not-allowed;transform:none;box-shadow:none}
+.error{color:var(--red);font-size:.82rem;margin-top:.3rem;min-height:1.1rem}
+.hide{display:none!important}
+.url-box{
+  background:var(--gS);border:1.5px solid #86efac;border-radius:8px;
+  padding:.875rem 1rem;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.84rem;
+  word-break:break-all;color:var(--gDD);margin:.875rem 0;line-height:1.65;
+}
+.copy-btn{
+  width:100%;padding:.6rem;background:#fff;color:var(--g);
+  border:1.5px solid #86efac;border-radius:8px;font-size:.88rem;
+  font-family:inherit;font-weight:600;cursor:pointer;margin-bottom:.875rem;
+  transition:.15s;display:flex;align-items:center;justify-content:center;gap:.35rem;
+}
+.copy-btn:hover{background:var(--gL);border-color:var(--g)}
+.pin-reminder{
+  background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;
+  padding:1rem 1.25rem;font-size:.85rem;color:#92400e;line-height:1.65;
+}
+.pin-val{display:block;font-size:1.9rem;letter-spacing:.5rem;margin-top:.45rem;text-align:center;font-weight:800;color:#7c2d12}
+.tick{font-size:3.2rem;text-align:center;margin-bottom:.5rem;line-height:1}
+.footer-link{display:block;text-align:center;margin-top:1.5rem;font-size:.8rem;color:var(--muted)}
+.footer-link a{color:var(--g);text-decoration:none;font-weight:500}
+.footer-link a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">⚽</div>
+  <h1>Create Your Draw</h1>
+  <p class="sub">World Cup 2026 Sweepstake &mdash; set up a draw for your friend group</p>
+
+  <div id="form-area">
+    <div class="form-row">
+      <label>Draw Name</label>
+      <input type="text" id="draw-name" placeholder="Work Lads 2026" maxlength="60" autocomplete="off"/>
+    </div>
+    <hr class="divider"/>
+    <div class="form-row">
+      <label>6-Digit PIN</label>
+      <input type="password" id="pin" placeholder="••••••" maxlength="6" inputmode="numeric" pattern="\d{6}"/>
+      <div class="hint">You'll need this PIN every time you open your management page.</div>
+      <div class="error" id="pin-err"></div>
+    </div>
+    <div class="form-row">
+      <label>Confirm PIN</label>
+      <input type="password" id="pin2" placeholder="••••••" maxlength="6" inputmode="numeric" pattern="\d{6}"
+             onkeydown="if(event.key==='Enter')createDraw()"/>
+    </div>
+    <div class="error" id="form-err"></div>
+    <button class="btn" id="create-btn" onclick="createDraw()">Create Draw →</button>
+  </div>
+
+  <div id="success" class="hide">
+    <div class="tick">🎉</div>
+    <h1 style="margin-bottom:.4rem">Draw Created!</h1>
+    <p style="text-align:center;color:var(--muted);font-size:.875rem;margin-bottom:1.25rem;line-height:1.55">
+      Bookmark or share this link — it's how you manage participants and set up WhatsApp:
+    </p>
+    <div class="url-box" id="manage-url"></div>
+    <button class="copy-btn" onclick="copyUrl()">📋 Copy Link</button>
+    <div class="pin-reminder">
+      <strong>🔐 Save your PIN &mdash; you'll need it every time you open this page.</strong>
+      <span class="pin-val" id="pin-display"></span>
+    </div>
+  </div>
+</div>
+<p class="footer-link"><a href="/">Admin Dashboard</a></p>
+
+<script>
+async function createDraw() {
+  const name = document.getElementById('draw-name').value.trim();
+  const pin  = document.getElementById('pin').value;
+  const pin2 = document.getElementById('pin2').value;
+  const fe   = document.getElementById('form-err');
+  const pe   = document.getElementById('pin-err');
+  fe.textContent = ''; pe.textContent = '';
+
+  if (!name)                   { fe.textContent = 'Enter a draw name.'; return; }
+  if (!/^\d{6}$/.test(pin))    { pe.textContent = 'PIN must be exactly 6 digits.'; return; }
+  if (pin !== pin2)            { fe.textContent = 'PINs do not match.'; return; }
+
+  const btn = document.getElementById('create-btn');
+  btn.textContent = 'Creating…'; btn.disabled = true;
+
+  try {
+    const r = await fetch('/api/setup/create', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({name, pin})
+    });
+    const data = await r.json();
+    if (data.error) { fe.textContent = data.error; btn.textContent = 'Create Draw →'; btn.disabled = false; return; }
+
+    document.getElementById('manage-url').textContent = location.origin + data.manageUrl;
+    document.getElementById('pin-display').textContent = pin;
+    document.getElementById('form-area').classList.add('hide');
+    document.getElementById('success').classList.remove('hide');
+  } catch(e) {
+    fe.textContent = 'Something went wrong. Please try again.';
+    btn.textContent = 'Create Draw →'; btn.disabled = false;
+  }
+}
+
+function copyUrl() {
+  const url = document.getElementById('manage-url').textContent;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    const orig = btn.textContent;
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = orig, 2000);
+  });
+}
+</script>
+</body>
+</html>

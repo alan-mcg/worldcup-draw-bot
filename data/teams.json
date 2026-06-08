@@ -12,7 +12,7 @@
   { "id": "BRA", "name": "Brazil",               "group": "C", "flag": "🇧🇷", "fifaRank": 6  },
   { "id": "MAR", "name": "Morocco",              "group": "C", "flag": "🇲🇦", "fifaRank": 8  },
   { "id": "SCO", "name": "Scotland",             "group": "C", "flag": "🏴󠁧󠁢󠁳󠁣󠁴󠁿", "fifaRank": 47 },
-  { "id": "CMR", "name": "Cameroon",             "group": "C", "flag": "🇨🇲", "fifaRank": 43 },
+  { "id": "HAI", "name": "Haiti",                "group": "C", "flag": "🇭🇹", "fifaRank": 82 },
 
   { "id": "USA", "name": "United States",        "group": "D", "flag": "🇺🇸", "fifaRank": 16 },
   { "id": "PAR", "name": "Paraguay",             "group": "D", "flag": "🇵🇾", "fifaRank": 64 },
@@ -22,7 +22,7 @@
   { "id": "GER", "name": "Germany",              "group": "E", "flag": "🇩🇪", "fifaRank": 10 },
   { "id": "ECU", "name": "Ecuador",              "group": "E", "flag": "🇪🇨", "fifaRank": 24 },
   { "id": "CIV", "name": "Ivory Coast",          "group": "E", "flag": "🇨🇮", "fifaRank": 33 },
-  { "id": "CHI", "name": "Chile",                "group": "E", "flag": "🇨🇱", "fifaRank": 69 },
+  { "id": "GHA", "name": "Ghana",                "group": "E", "flag": "🇬🇭", "fifaRank": 56 },
 
   { "id": "NED", "name": "Netherlands",          "group": "F", "flag": "🇳🇱", "fifaRank": 7  },
   { "id": "JPN", "name": "Japan",                "group": "F", "flag": "🇯🇵", "fifaRank": 18 },
@@ -36,7 +36,7 @@
 
   { "id": "ESP", "name": "Spain",                "group": "H", "flag": "🇪🇸", "fifaRank": 2  },
   { "id": "URU", "name": "Uruguay",              "group": "H", "flag": "🇺🇾", "fifaRank": 17 },
-  { "id": "SAU", "name": "Saudi Arabia",         "group": "H", "flag": "🇸🇦", "fifaRank": 57 },
+  { "id": "KSA", "name": "Saudi Arabia",         "group": "H", "flag": "🇸🇦", "fifaRank": 57 },
   { "id": "UZB", "name": "Uzbekistan",           "group": "H", "flag": "🇺🇿", "fifaRank": 74 },
 
   { "id": "FRA", "name": "France",               "group": "I", "flag": "🇫🇷", "fifaRank": 1  },
@@ -46,7 +46,7 @@
 
   { "id": "ARG", "name": "Argentina",            "group": "J", "flag": "🇦🇷", "fifaRank": 3  },
   { "id": "AUT", "name": "Austria",              "group": "J", "flag": "🇦🇹", "fifaRank": 23 },
-  { "id": "DZA", "name": "Algeria",              "group": "J", "flag": "🇩🇿", "fifaRank": 36 },
+  { "id": "ALG", "name": "Algeria",              "group": "J", "flag": "🇩🇿", "fifaRank": 36 },
   { "id": "CPV", "name": "Cape Verde",           "group": "J", "flag": "🇨🇻", "fifaRank": 72 },
 
   { "id": "POR", "name": "Portugal",             "group": "K", "flag": "🇵🇹", "fifaRank": 5  },
