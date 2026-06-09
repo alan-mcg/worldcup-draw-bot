@@ -14,29 +14,28 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-  min-height:100vh;display:flex;flex-direction:column;
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:2.5rem 1.5rem;
   background:linear-gradient(160deg,#052e16 0%,#14532d 35%,#166534 65%,#15803d 100%);
   color:var(--text);
 }
 
-/* ── HERO ──────────────────────────────────────── */
-.hero{
-  text-align:center;padding:3rem 1.5rem 2rem;color:#fff;
-  flex-shrink:0;
+/* ── CENTRE WRAP ───────────────────────────────── */
+.wrap{
+  display:flex;flex-direction:column;align-items:center;
+  width:100%;max-width:420px;
 }
-.hero .trophy{font-size:4rem;line-height:1;margin-bottom:.75rem}
-.hero h1{font-size:2rem;font-weight:800;letter-spacing:-.5px;margin-bottom:.4rem}
-.hero p{font-size:1rem;opacity:.8;line-height:1.5}
+
+/* ── HERO ──────────────────────────────────────── */
+.hero{text-align:center;color:#fff;margin-bottom:1.75rem}
+.hero .trophy{font-size:3.5rem;line-height:1;margin-bottom:.6rem}
+.hero h1{font-size:1.9rem;font-weight:800;letter-spacing:-.5px;margin-bottom:.35rem}
+.hero p{font-size:.95rem;opacity:.75;line-height:1.5}
 
 /* ── CARD ──────────────────────────────────────── */
-.card-wrap{
-  flex:1;display:flex;align-items:flex-start;justify-content:center;
-  padding:0 1.5rem 3rem;
-}
 .card{
   background:#fff;border-radius:var(--r);padding:2.25rem;
-  max-width:420px;width:100%;
-  box-shadow:var(--shadow);
+  width:100%;box-shadow:var(--shadow);
 }
 .card-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:.25rem;letter-spacing:-.15px}
 .card-sub{font-size:.84rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.5}
@@ -81,21 +80,33 @@ input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,
 /* ── ERROR ─────────────────────────────────────── */
 .error{color:var(--red);font-size:.82rem;margin-top:.4rem;min-height:1.1rem}
 
-/* ── FOOTER ────────────────────────────────────── */
-.footer{text-align:center;padding:.75rem;color:rgba(255,255,255,.4);font-size:.75rem}
-.footer a{color:rgba(255,255,255,.55);text-decoration:none}
-.footer a:hover{color:rgba(255,255,255,.8)}
+/* ── ADMIN LINK ─────────────────────────────────── */
+.admin-link{margin-top:.875rem}
+.admin-link a{font-size:.72rem;text-decoration:none;color:rgba(255,255,255,.25);transition:color .2s}
+.admin-link a:hover{color:rgba(255,255,255,.6)}
+
+/* ── RESPONSIVE ─────────────────────────────────── */
+@media(max-width:480px){
+  body{padding:1.5rem 1rem}
+  .hero h1{font-size:1.6rem}
+  .hero .trophy{font-size:2.8rem}
+  .card{padding:1.75rem 1.5rem}
+  input{padding:.55rem .75rem;font-size:.9rem}
+  .btn-primary{padding:.6rem;font-size:.9rem}
+  .btn-outline{padding:.58rem;font-size:.88rem}
+}
 </style>
 </head>
 <body>
 
-<div class="hero">
-  <div class="trophy">⚽🏆</div>
-  <h1>World Cup 2026 Draw Bot</h1>
-  <p>Daily WhatsApp updates · Live scores · Group sweepstake</p>
-</div>
+<div class="wrap">
 
-<div class="card-wrap">
+  <div class="hero">
+    <div class="trophy">⚽🏆</div>
+    <h1>World Cup 2026 Draw Bot</h1>
+    <p>Daily updates · Live scores · Group sweepstake</p>
+  </div>
+
   <div class="card">
 
     <div class="card-title">Sign in to your draw</div>
@@ -123,10 +134,9 @@ input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,
     </div>
 
   </div>
-</div>
 
-<div class="footer">
-  <a href="/admin">Admin dashboard</a>
+  <div class="admin-link"><a href="/admin">Admin</a></div>
+
 </div>
 
 <script>
@@ -155,7 +165,6 @@ async function signIn() {
       return;
     }
 
-    // Cache PIN in sessionStorage so manage page skips the gate
     sessionStorage.setItem('wc_pin_' + data.slug, pin);
     location.href = '/manage/' + data.slug;
   } catch(e) {

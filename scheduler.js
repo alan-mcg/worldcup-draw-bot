@@ -1,4 +1,4 @@
-// scheduler.js — auto-sends to all groups daily + syncs live scores from ESPN
+// scheduler.js — auto-sends to all groups daily + syncs live scores
 // node scheduler.js  (keep running, use pm2 in production)
 
 const cron = require('node-cron');
@@ -23,7 +23,7 @@ const sendSchedule = getSendSchedule();
 
 console.log('⏰ World Cup Bot Scheduler started');
 console.log(`   📤 Sends daily at ${JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'config.json'), 'utf8')).send_time || '09:00'}`);
-console.log('   🔄 Syncs ESPN scores every 2 hours');
+console.log('   🔄 Syncs scores every 2 hours');
 console.log('   Use Ctrl+C to stop, or pm2 to run in background\n');
 
 cron.schedule(SYNC_SCHEDULE, () => {

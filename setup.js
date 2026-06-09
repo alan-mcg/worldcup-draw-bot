@@ -28,8 +28,8 @@ if (!fs.existsSync(path.join(DATA, 'matches.json'))) {
   fs.writeFileSync(path.join(DATA, 'matches.json'), '[]');
 }
 
-// Auto-fetch all World Cup 2026 fixtures from ESPN (no API key needed)
-console.log('\n🔄 Fetching all World Cup 2026 fixtures from ESPN...');
+// Auto-fetch all World Cup 2026 fixtures (no API key needed)
+console.log('\n🔄 Fetching all World Cup 2026 fixtures...');
 const { syncAllFixtures } = require('./api_sync');
 syncAllFixtures()
   .then(r => {

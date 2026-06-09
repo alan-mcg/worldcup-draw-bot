@@ -98,26 +98,57 @@ async function verifyDrawPin(slug, pin) {
 
 // ── ADMIN ROUTES (full dashboard) ───────────────────
 
+// Wraps a handler so it requires a valid admin session token
+function adminOnly(fn) {
+  return async (req, res) => {
+    if (!checkAdminSession(req)) return json(res, { error: 'Unauthorised' }, 401);
+    return fn(req, res);
+  };
+}
+
 const ROUTES = {
+  // ── Public pages ───────────────────────────────────
   'GET /':               (q,r) => serveHtml(r, 'index.html'),
-  'GET /admin':                    (q,r) => serveHtml(r, 'dashboard.html'),
+  'GET /admin':          (q,r) => serveHtml(r, 'dashboard.html'),
+
+  // ── Auth ────────────────────────────────────────────
   'POST /api/draw-login':          handleDrawLogin,
   'POST /api/admin/login':         handleAdminLogin,
   'POST /api/admin/logout':        handleAdminLogout,
   'POST /api/admin/draws/delete':  handleAdminDeleteDraw,
-  'GET /api/teams':      (q,r) => json(r, load('teams.json')),
-  'GET /api/matches':    (q,r) => json(r, load('matches.json')),
-  'GET /api/draws':      (q,r) => json(r, load('draws.json')),
-  'GET /api/config':     (q,r) => json(r, load('config.json')),
-  'POST /api/teams':     async (q,r) => { save('teams.json',  await parseBody(q)); json(r,{ok:true}); },
-  'POST /api/matches':   async (q,r) => { save('matches.json',await parseBody(q)); json(r,{ok:true}); },
-  'POST /api/draws':     async (q,r) => { save('draws.json',  await parseBody(q)); json(r,{ok:true}); },
-  'POST /api/config':    async (q,r) => { save('config.json', await parseBody(q)); json(r,{ok:true}); },
-  'GET /api/leaderboard':    apiLeaderboard,
-  'POST /api/preview':       apiPreview,
-  'POST /api/send':          apiSend,
-  'POST /api/sync-today':    async (q,r) => { try { json(r, await syncToday());       } catch(e) { json(r,{error:e.message},500); } },
-  'POST /api/sync-all':      async (q,r) => { try { json(r, await syncAllFixtures()); } catch(e) { json(r,{error:e.message},500); } },
+
+  // ── Public reads (fixture/team data — no secrets) ──
+  'GET /api/teams':        (_,r) => json(r, load('teams.json')),
+  'GET /api/matches':      (_,r) => json(r, load('matches.json')),
+  'GET /api/leaderboard':  apiLeaderboard,
+
+  // ── Admin-only reads ────────────────────────────────
+  // Strip pinHash/pinSalt before sending draws to client
+  'GET /api/draws': adminOnly((_,r) => {
+    const safe = load('draws.json').map(({ pinHash, pinSalt, ...d }) => d);
+    json(r, safe);
+  }),
+  // Strip API key from config response
+  'GET /api/config': adminOnly((_,r) => {
+    const { football_data_api_key, ...safe } = load('config.json');
+    json(r, safe);
+  }),
+
+  // ── Admin-only writes ───────────────────────────────
+  'POST /api/teams':    adminOnly(async (q,r) => { save('teams.json',   await parseBody(q)); json(r,{ok:true}); }),
+  'POST /api/matches':  adminOnly(async (q,r) => { save('matches.json', await parseBody(q)); json(r,{ok:true}); }),
+  'POST /api/draws':    adminOnly(async (q,r) => { save('draws.json',   await parseBody(q)); json(r,{ok:true}); }),
+  'POST /api/config':   adminOnly(async (q,r) => {
+    // Never allow the API key to be overwritten via this endpoint
+    const body = await parseBody(q);
+    const existing = load('config.json');
+    save('config.json', { ...body, football_data_api_key: existing.football_data_api_key });
+    json(r, { ok: true });
+  }),
+  'POST /api/preview':    adminOnly(apiPreview),
+  'POST /api/send':       adminOnly(apiSend),
+  'POST /api/sync-today': adminOnly(async (_,r) => { try { json(r, await syncToday());       } catch(e) { json(r,{error:e.message},500); } }),
+  'POST /api/sync-all':   adminOnly(async (_,r) => { try { json(r, await syncAllFixtures()); } catch(e) { json(r,{error:e.message},500); } }),
 };
 
 async function apiLeaderboard(req, res) {
@@ -223,7 +254,7 @@ async function handleSetupCreate(req, res) {
     description: '',
     pinHash,
     pinSalt:     salt,
-    group:       { callmebot_group_id: '', callmebot_apikey: '' },
+    group:       { discord_webhook: '' },
     users:       []
   });
   save('draws.json', draws);
@@ -274,19 +305,36 @@ async function handleManageApi(req, res, urlPath) {
       if (!Array.isArray(userNames) || !userNames.length)
         return json(res, { error: 'No participants provided' }, 400);
       const allTeams = load('teams.json');
-      const need = userNames.length * teamsPerPerson;
+      const n    = userNames.length;
+      const need = n * teamsPerPerson;
       if (need > allTeams.length)
         return json(res, { error: `Need ${need} teams but only ${allTeams.length} available` }, 400);
-      const shuffled = [...allTeams].sort(() => Math.random() - 0.5);
+
+      // Sort by FIFA rank ascending; unranked (0 or missing) go to the end
+      const sorted = [...allTeams].sort((a, b) =>
+        (a.fifaRank || 9999) - (b.fifaRank || 9999)
+      );
+
+      // Build teamsPerPerson tiers of n teams each, shuffle each tier
+      const tiers = Array.from({ length: teamsPerPerson }, (_, t) => {
+        const tier = sorted.slice(t * n, (t + 1) * n);
+        for (let i = tier.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [tier[i], tier[j]] = [tier[j], tier[i]];
+        }
+        return tier;
+      });
+
+      // Each person draws one team from each tier
       const users = userNames.map((name, i) => ({
-        id: 'u' + (Date.now() + i),
-        name: name.trim(),
-        phone: '',
-        teams: shuffled.slice(i * teamsPerPerson, (i + 1) * teamsPerPerson).map(t => t.id)
+        id:    'u' + (Date.now() + i),
+        name:  name.trim(),
+        teams: tiers.map(tier => tier[i].id)
       }));
+
       const draws = load('draws.json');
       const idx   = draws.findIndex(d => d.slug === slug);
-      draws[idx]  = { ...draws[idx], users };
+      draws[idx]  = { ...draws[idx], teamsPerPerson, users };
       save('draws.json', draws);
       return json(res, { ok: true, users });
     }
@@ -309,16 +357,16 @@ function buildPreview(draw, date) {
   const d        = date || new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Dublin' });
   const message  = buildGroupMessage(
     draw, buildLeaderboard(draw), calcDrawStandings(draw),
-    matches.filter(m => m.date === d), teamsMap
+    matches.filter(m => m.date === d), teamsMap, d
   );
   return { message, date: d };
 }
 
 async function sendToGroup(draw) {
-  const { sendGroupWhatsApp } = require('./whatsapp');
+  const { sendDiscordMessage } = require('./whatsapp');
   const preview = buildPreview(draw);
-  const { callmebot_group_id, callmebot_apikey } = draw.group || {};
-  const result  = await sendGroupWhatsApp(callmebot_group_id, callmebot_apikey, preview.message);
+  const { discord_webhook } = draw.group || {};
+  const result  = await sendDiscordMessage(discord_webhook, preview.message);
   return { sent: result.success, message: preview.message, result };
 }
 
@@ -389,7 +437,7 @@ server.listen(3000, () => {
 
   const config = load('config.json');
   if (!config.last_synced) {
-    console.log('   First run — fetching all fixtures from ESPN...');
+    console.log('   First run — fetching all fixtures...');
     syncAllFixtures().catch(e => console.error('Initial sync error:', e.message));
   } else {
     syncToday().catch(e => console.error('Startup sync error:', e.message));

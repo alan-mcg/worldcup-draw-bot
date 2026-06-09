@@ -69,6 +69,15 @@ input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,
 .footer-link{display:block;text-align:center;margin-top:1.5rem;font-size:.8rem;color:var(--muted)}
 .footer-link a{color:var(--g);text-decoration:none;font-weight:500}
 .footer-link a:hover{text-decoration:underline}
+
+/* ── RESPONSIVE ─────────────────────────────────── */
+@media(max-width:480px){
+  body{padding:1.25rem 1rem}
+  .card{padding:2rem 1.5rem}
+  h1{font-size:1.35rem}
+  input{padding:.55rem .75rem;font-size:.9rem}
+  .btn{padding:.65rem;font-size:.9rem}
+}
 </style>
 </head>
 <body>
@@ -112,7 +121,6 @@ input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,
     </div>
   </div>
 </div>
-<p class="footer-link"><a href="/">Admin Dashboard</a></p>
 
 <script>
 async function createDraw() {

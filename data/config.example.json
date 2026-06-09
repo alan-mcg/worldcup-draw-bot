@@ -1,5 +1,6 @@
 {
   "timezone": "Europe/Dublin",
   "send_time": "09:00",
-  "last_synced": null
+  "last_synced": null,
+  "football_data_api_key": "YOUR_KEY_FROM_FOOTBALL_DATA_ORG"
 }
