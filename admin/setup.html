@@ -138,10 +138,9 @@ async function createDraw() {
     const data = await r.json();
     if (data.error) { fe.textContent = data.error; btn.textContent = 'Create Draw →'; btn.disabled = false; return; }
 
-    document.getElementById('manage-url').textContent = location.origin + data.manageUrl;
-    document.getElementById('pin-display').textContent = pin;
-    document.getElementById('form-area').classList.add('hide');
-    document.getElementById('success').classList.remove('hide');
+    // Cache PIN so manage page skips the gate, then go straight to setup wizard
+    sessionStorage.setItem('wc_pin_' + data.slug, pin);
+    location.href = '/manage/' + data.slug + '?setup=1';
   } catch(e) {
     fe.textContent = 'Something went wrong. Please try again.';
     btn.textContent = 'Create Draw →'; btn.disabled = false;

@@ -100,6 +100,11 @@ async function verifyDrawPin(slug, pin) {
 
 const ROUTES = {
   'GET /':               (q,r) => serveHtml(r, 'index.html'),
+  'GET /admin':                    (q,r) => serveHtml(r, 'dashboard.html'),
+  'POST /api/draw-login':          handleDrawLogin,
+  'POST /api/admin/login':         handleAdminLogin,
+  'POST /api/admin/logout':        handleAdminLogout,
+  'POST /api/admin/draws/delete':  handleAdminDeleteDraw,
   'GET /api/teams':      (q,r) => json(r, load('teams.json')),
   'GET /api/matches':    (q,r) => json(r, load('matches.json')),
   'GET /api/draws':      (q,r) => json(r, load('draws.json')),
@@ -134,6 +139,65 @@ async function apiSend(req, res) {
   const draw = load('draws.json').find(d => d.id === body.drawId);
   if (!draw) return json(res, { error: 'Draw not found' }, 404);
   json(res, await sendToGroup(draw));
+}
+
+// ── ADMIN AUTH ───────────────────────────────────────
+// Sessions are in-memory (reset on restart) — intentional for a WC bot.
+// Password hash lives in data/admin.json which is gitignored.
+
+const adminSessions = new Map(); // token → createdAt (ms)
+
+function createAdminSession() {
+  const token = crypto.randomBytes(32).toString('hex');
+  adminSessions.set(token, Date.now());
+  // Expire sessions older than 24 h
+  for (const [t, ts] of adminSessions)
+    if (Date.now() - ts > 86_400_000) adminSessions.delete(t);
+  return token;
+}
+
+function checkAdminSession(req) {
+  const token = req.headers['x-admin-token'];
+  if (!token) return false;
+  const ts = adminSessions.get(token);
+  if (!ts) return false;
+  if (Date.now() - ts > 86_400_000) { adminSessions.delete(token); return false; }
+  return true;
+}
+
+async function handleAdminLogin(req, res) {
+  const { password } = await parseBody(req);
+  let cfg;
+  try { cfg = load('admin.json'); }
+  catch { return json(res, { error: 'Admin not configured — run: node setup-admin.js' }, 503); }
+  const hash = await hashPin(String(password || ''), cfg.passwordSalt);
+  if (hash !== cfg.passwordHash) return json(res, { ok: false, error: 'Incorrect password' });
+  return json(res, { ok: true, token: createAdminSession() });
+}
+
+function handleAdminLogout(req, res) {
+  adminSessions.delete(req.headers['x-admin-token']);
+  json(res, { ok: true });
+}
+
+async function handleAdminDeleteDraw(req, res) {
+  if (!checkAdminSession(req)) return json(res, { error: 'Unauthorised' }, 401);
+  const { slug } = await parseBody(req);
+  if (!slug) return json(res, { error: 'slug required' }, 400);
+  const draws = load('draws.json').filter(d => d.slug !== slug && d.id !== slug);
+  save('draws.json', draws);
+  json(res, { ok: true });
+}
+
+// ── DRAW LOGIN (landing page) ────────────────────────
+
+async function handleDrawLogin(req, res) {
+  const { name, pin } = await parseBody(req);
+  if (!name?.trim()) return json(res, { error: 'Enter your draw name' }, 400);
+  const slug = slugify(name.trim());
+  const result = await verifyDrawPin(slug, pin);
+  if (result.error) return json(res, { ok: false, error: result.error, locked: result.locked });
+  return json(res, { ok: true, slug });
 }
 
 // ── SETUP ROUTE ──────────────────────────────────────
@@ -204,6 +268,27 @@ async function handleManageApi(req, res, urlPath) {
       };
       save('draws.json', draws);
       return json(res, { ok: true });
+    }
+    case 'assign-teams': {
+      const { userNames, teamsPerPerson } = body;
+      if (!Array.isArray(userNames) || !userNames.length)
+        return json(res, { error: 'No participants provided' }, 400);
+      const allTeams = load('teams.json');
+      const need = userNames.length * teamsPerPerson;
+      if (need > allTeams.length)
+        return json(res, { error: `Need ${need} teams but only ${allTeams.length} available` }, 400);
+      const shuffled = [...allTeams].sort(() => Math.random() - 0.5);
+      const users = userNames.map((name, i) => ({
+        id: 'u' + (Date.now() + i),
+        name: name.trim(),
+        phone: '',
+        teams: shuffled.slice(i * teamsPerPerson, (i + 1) * teamsPerPerson).map(t => t.id)
+      }));
+      const draws = load('draws.json');
+      const idx   = draws.findIndex(d => d.slug === slug);
+      draws[idx]  = { ...draws[idx], users };
+      save('draws.json', draws);
+      return json(res, { ok: true, users });
     }
     case 'preview':
       return json(res, buildPreview(draw, body.date));

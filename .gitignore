@@ -5,6 +5,7 @@ node_modules/
 data/config.json
 data/draws.json
 data/matches.json
+data/admin.json
 
 # Keep these tracked (safe, no secrets)
 !data/config.example.json

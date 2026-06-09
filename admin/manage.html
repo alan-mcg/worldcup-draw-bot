@@ -47,33 +47,91 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .gate-btn:hover{background:var(--gD);transform:translateY(-1px);box-shadow:0 4px 14px rgba(22,163,74,.3)}
 .gate-err{color:var(--red);font-size:.83rem;margin-top:.65rem;min-height:1.2rem}
 
-/* ── APP ─────────────────────────────────────── */
-.app{display:none}
-.app.show{display:block}
-header{
+/* ── SHARED HEADER ───────────────────────────── */
+.app-header{
   background:linear-gradient(135deg,#07130a,var(--gDD),var(--gD));
   color:#fff;padding:1rem 1.5rem;
   display:flex;align-items:center;justify-content:space-between;gap:1rem;
   box-shadow:0 1px 0 rgba(0,0,0,.2),0 2px 8px rgba(0,0,0,.12);
+  position:sticky;top:0;z-index:40;
 }
-header h1{font-size:1.1rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.15px}
-header .meta{font-size:.75rem;opacity:.7;margin-top:.15rem}
-.signout{
+.app-header h1{font-size:1.1rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.15px}
+.app-header .meta{font-size:.75rem;opacity:.7;margin-top:.15rem}
+.switch-btn{
   background:rgba(255,255,255,.1);color:rgba(255,255,255,.9);
   border:1px solid rgba(255,255,255,.2);border-radius:6px;
   padding:.35rem .875rem;font-size:.8rem;cursor:pointer;font-family:inherit;
   white-space:nowrap;flex-shrink:0;transition:.15s;font-weight:500;
 }
-.signout:hover{background:rgba(255,255,255,.22);color:#fff}
+.switch-btn:hover{background:rgba(255,255,255,.22);color:#fff}
 
-/* ── TABS ─────────────────────────────────────── */
+/* ── WIZARD ──────────────────────────────────── */
+#wizard{display:none}
+.wizard-bar{
+  background:var(--card);border-bottom:1px solid var(--border);
+  padding:.875rem 1.5rem;display:flex;align-items:center;gap:.5rem;
+  overflow-x:auto;
+}
+.w-step{display:flex;align-items:center;gap:.4rem;font-size:.82rem;color:var(--muted);white-space:nowrap;font-weight:500}
+.w-step .num{
+  width:24px;height:24px;border-radius:50%;background:#e2e8f0;
+  color:var(--muted);display:inline-flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:700;flex-shrink:0;transition:.2s;
+}
+.w-step.done .num{background:var(--g);color:#fff}
+.w-step.active .num{background:var(--g);color:#fff}
+.w-step.active{color:var(--text);font-weight:600}
+.w-sep{color:#cbd5e1;font-size:.8rem}
+.wizard-main{padding:2rem 1.5rem;max-width:700px}
+.w-title{font-size:1.35rem;font-weight:700;color:var(--text);margin-bottom:.4rem;letter-spacing:-.2px}
+.w-sub{font-size:.875rem;color:var(--muted);margin-bottom:1.75rem;line-height:1.55}
+
+.names-area{
+  width:100%;min-height:160px;border:1.5px solid var(--border);border-radius:8px;
+  padding:.75rem;font-size:.9rem;font-family:inherit;resize:vertical;
+  transition:border-color .15s,box-shadow .15s;line-height:1.75;
+}
+.names-area:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,74,.12)}
+.name-count{font-size:.82rem;color:var(--muted);margin-top:.4rem;min-height:1.2rem}
+
+.tpp-grid{display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap}
+.tpp-opt{
+  flex:1;min-width:90px;border:2px solid var(--border);border-radius:10px;
+  padding:1rem .75rem;text-align:center;cursor:pointer;transition:.15s;background:#fff;
+}
+.tpp-opt:hover{border-color:var(--g)}
+.tpp-opt.selected{border-color:var(--g);background:var(--gS)}
+.tpp-opt .num{font-size:1.9rem;font-weight:800;color:var(--g);line-height:1}
+.tpp-opt .lbl{font-size:.75rem;color:var(--muted);margin-top:.2rem;font-weight:500}
+.calc-box{background:var(--gS);border:1px solid #bbf7d0;border-radius:8px;padding:.75rem 1rem;font-size:.85rem;color:var(--gD);font-weight:500;margin-bottom:1.25rem;min-height:2.5rem}
+.calc-box.warn{background:#fef2f2;border-color:#fca5a5;color:var(--red)}
+.calc-box.empty{background:transparent;border-color:transparent}
+
+.review-table{width:100%;border-collapse:collapse;font-size:.87rem}
+.review-table th{text-align:left;padding:.5rem .75rem;background:var(--bg);color:var(--muted);font-size:.71rem;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.review-table td{padding:.65rem .75rem;border-bottom:1px solid var(--border);vertical-align:middle}
+.review-table tr:last-child td{border-bottom:none}
+.team-chip{display:inline-flex;align-items:center;gap:3px;background:var(--gL);color:var(--gD);border-radius:20px;padding:.15rem .55rem;font-size:.76rem;font-weight:600;margin:.1rem}
+
+/* ── BUTTONS ─────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:.45rem 1rem;border-radius:8px;border:1.5px solid;cursor:pointer;font-size:.83rem;font-family:inherit;font-weight:500;transition:.15s}
+.btn-sm{padding:.28rem .65rem;font-size:.77rem}
+.btn-green{background:var(--g);color:#fff;border-color:var(--g)}.btn-green:hover{background:var(--gD)}
+.btn-secondary{background:#fff;color:var(--g);border-color:#c8e6d4}.btn-secondary:hover{background:var(--gL);border-color:var(--g)}
+.btn-danger{background:#fff;color:var(--red);border-color:#fca5a5}.btn-danger:hover{background:#fef2f2;border-color:var(--red)}
+.btn-gold{background:var(--gold);color:#fff;border-color:var(--gold)}.btn-gold:hover{background:#b45309}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-row{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem}
+
+/* ── MAIN APP ────────────────────────────────── */
+#app{display:none}
 .tabs{
   display:flex;border-bottom:1px solid var(--border);
   background:var(--card);padding:0 1.5rem;overflow-x:auto;
-  box-shadow:0 1px 3px rgba(0,0,0,.04);
+  box-shadow:0 1px 3px rgba(0,0,0,.04);position:sticky;top:57px;z-index:30;
 }
 .tab{
-  padding:.8rem 1.1rem;font-size:.875rem;cursor:pointer;
+  padding:.8rem 1rem;font-size:.875rem;cursor:pointer;
   border-bottom:2.5px solid transparent;margin-bottom:-1px;
   color:var(--muted);font-family:inherit;background:none;
   border-top:none;border-left:none;border-right:none;
@@ -82,12 +140,59 @@ header .meta{font-size:.75rem;opacity:.7;margin-top:.15rem}
 .tab:hover{color:var(--text2)}
 .tab.active{color:var(--g);border-bottom-color:var(--g);font-weight:600}
 
-main{padding:1.75rem;max-width:880px}
+main{padding:1.75rem;max-width:900px}
 .section{display:none}.section.active{display:block}
+
+/* ── OVERVIEW ────────────────────────────────── */
+.ov-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.875rem;margin-bottom:1.5rem}
+.ov-stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center;box-shadow:var(--shadow)}
+.ov-stat .val{font-size:2rem;font-weight:800;color:var(--g);line-height:1;letter-spacing:-.3px}
+.ov-stat .lbl{font-size:.7rem;color:var(--muted);margin-top:.3rem;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+
+.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-weight:700;font-size:.8rem}
+.rk1{background:#fef3c7;color:#92400e}.rk2{background:#f1f5f9;color:#475569}.rk3{background:#fef2f2;color:#c2410c}.rkn{background:var(--gS);color:var(--gD)}
+
+/* regular fixture row */
+.fixture-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.7rem .875rem;border-bottom:1px solid var(--border);font-size:.86rem;gap:.5rem;flex-wrap:wrap;
+}
+.fixture-item:last-child{border-bottom:none}
+.fixture-teams{display:flex;align-items:center;gap:.4rem;flex:1;min-width:0}
+.fixture-score{font-weight:700;color:var(--text);white-space:nowrap;min-width:50px;text-align:center}
+.fixture-score.upcoming{color:var(--muted);font-weight:400}
+.fixture-date-header{padding:.5rem .875rem;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);background:var(--bg)}
+
+/* clash card */
+.clash-card{
+  margin:.75rem 1rem;
+  border:1.5px solid #fcd34d;border-radius:12px;overflow:hidden;
+  background:linear-gradient(135deg,#fffbeb 0%,#fff 100%);
+  box-shadow:0 2px 8px rgba(217,119,6,.12);
+}
+.clash-card-header{
+  background:linear-gradient(90deg,#d97706,#f59e0b);
+  color:#fff;padding:.35rem 1rem;
+  display:flex;align-items:center;gap:.4rem;
+  font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;
+}
+.clash-matchup{
+  display:grid;grid-template-columns:1fr auto 1fr;
+  align-items:center;gap:.5rem;padding:.875rem 1rem;
+}
+.clash-side{text-align:center}
+.clash-side-right{text-align:center}
+.clash-person{font-size:1rem;font-weight:800;color:var(--text);margin-bottom:.2rem;letter-spacing:-.1px}
+.clash-team{font-size:.84rem;color:var(--text2)}
+.clash-center{text-align:center;padding:0 .5rem}
+.clash-score{font-size:1.4rem;font-weight:800;color:var(--text);line-height:1}
+.clash-score.upcoming{font-size:1rem;font-weight:600;color:var(--muted)}
+.clash-time{font-size:.72rem;color:var(--muted);margin-top:.2rem}
 
 /* ── CARDS ───────────────────────────────────── */
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;margin-bottom:1.25rem;box-shadow:var(--shadow)}
 .card h2{font-size:.95rem;color:var(--text2);font-weight:600;margin-bottom:.95rem}
+.card.flush{padding:0;overflow:hidden}
 
 /* ── TABLE ───────────────────────────────────── */
 table{width:100%;border-collapse:collapse;font-size:.87rem}
@@ -96,15 +201,7 @@ td{padding:.7rem .75rem;border-bottom:1px solid var(--border);vertical-align:mid
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#fafafa}
 
-/* ── BUTTONS ─────────────────────────────────── */
-.btn{display:inline-flex;align-items:center;gap:4px;padding:.42rem .9rem;border-radius:8px;border:1.5px solid;cursor:pointer;font-size:.82rem;font-family:inherit;font-weight:500;transition:.15s}
-.btn-sm{padding:.28rem .6rem;font-size:.76rem}
-.btn-green{background:var(--g);color:#fff;border-color:var(--g)}.btn-green:hover{background:var(--gD);border-color:var(--gD)}
-.btn-secondary{background:#fff;color:var(--g);border-color:#c8e6d4}.btn-secondary:hover{background:var(--gL);border-color:var(--g)}
-.btn-danger{background:#fff;color:var(--red);border-color:#fca5a5}.btn-danger:hover{background:#fef2f2;border-color:var(--red)}
-.btn-gold{background:var(--gold);color:#fff;border-color:var(--gold)}.btn-gold:hover{background:#b45309}
-
-/* ── FORM ────────────────────────────────────── */
+/* ── FORMS ───────────────────────────────────── */
 .form-row{margin-bottom:1rem}
 .form-row label{display:block;font-size:.73rem;color:var(--muted);margin-bottom:.3rem;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
 input[type=text],input[type=tel],input[type=date]{
@@ -113,8 +210,6 @@ input[type=text],input[type=tel],input[type=date]{
   transition:border-color .15s,box-shadow .15s;
 }
 input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,74,.12)}
-
-/* ── TEAM TAGS ───────────────────────────────── */
 .tag-grid{display:flex;flex-wrap:wrap;gap:.3rem;max-height:200px;overflow-y:auto;border:1.5px solid var(--border);border-radius:8px;padding:.5rem}
 .tag{display:inline-flex;align-items:center;gap:2px;padding:.22rem .55rem;border-radius:20px;font-size:.76rem;background:var(--gS);color:var(--gD);cursor:pointer;border:1.5px solid transparent;transition:.12s;user-select:none;font-weight:500}
 .tag:hover:not(.taken){border-color:var(--g)}
@@ -127,10 +222,8 @@ input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,
 .modal{background:#fff;border-radius:14px;padding:1.75rem;max-width:490px;width:92%;max-height:88vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.2)}
 .modal h2{font-size:1rem;color:var(--text);font-weight:700;margin-bottom:1.1rem}
 
-/* ── PREVIEW BOX ─────────────────────────────── */
-.preview-box{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:1.1rem;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.79rem;white-space:pre-wrap;max-height:420px;overflow-y:auto;line-height:1.7;margin-top:.875rem}
-
 /* ── MISC ────────────────────────────────────── */
+.preview-box{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:1.1rem;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.79rem;white-space:pre-wrap;max-height:420px;overflow-y:auto;line-height:1.7;margin-top:.875rem}
 .toolbar{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.1rem;align-items:center}
 .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--text);color:#fff;padding:.65rem 1.1rem;border-radius:10px;font-size:.85rem;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.22)}
 .toast.show{opacity:1}
@@ -140,11 +233,16 @@ input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,
 .info-box code{background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px;font-size:.8rem}
 .team-pill{display:inline-flex;align-items:center;gap:2px;background:var(--gL);color:var(--gD);border-radius:20px;padding:.12rem .5rem;font-size:.73rem;margin:.1rem;font-weight:500}
 .empty{text-align:center;color:var(--muted);padding:2rem;font-style:italic}
+.pts-big{font-size:1.15rem;font-weight:700;color:var(--text)}
+.badge{display:inline-block;padding:.15rem .55rem;border-radius:20px;font-size:.72rem;font-weight:600}
+.bg-green{background:var(--gL);color:var(--gD)}
+.bg-gray{background:#f1f5f9;color:#475569}
+.bg-gold{background:var(--goldL);color:#92400e}
 </style>
 </head>
 <body>
 
-<!-- ── PIN GATE ─────────────────────────────────────── -->
+<!-- ── PIN GATE ───────────────────────────────────────── -->
 <div class="gate" id="gate">
   <div class="gate-card">
     <div class="logo">⚽</div>
@@ -158,29 +256,122 @@ input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,
   </div>
 </div>
 
-<!-- ── APP ────────────────────────────────────────────── -->
-<div class="app" id="app">
-  <header>
+<!-- ── SETUP WIZARD ───────────────────────────────────── -->
+<div id="wizard">
+  <div class="app-header">
+    <div style="min-width:0">
+      <h1 id="wiz-title">Set Up Your Draw</h1>
+      <div class="meta">New draw setup</div>
+    </div>
+    <button class="switch-btn" onclick="switchDraw()">⇄ Switch Draw</button>
+  </div>
+
+  <div class="wizard-bar">
+    <div class="w-step active" id="ind-1"><span class="num">1</span> Add Participants</div>
+    <div class="w-sep">›</div>
+    <div class="w-step" id="ind-2"><span class="num">2</span> Teams per Person</div>
+    <div class="w-sep">›</div>
+    <div class="w-step" id="ind-3"><span class="num">3</span> Review &amp; Confirm</div>
+  </div>
+
+  <div class="wizard-main">
+
+    <!-- STEP 1: Names -->
+    <div id="wstep-1">
+      <div class="w-title">Who's in the draw?</div>
+      <div class="w-sub">Enter everyone's name — one per line or comma-separated. These are the people who will be randomly assigned World Cup teams.</div>
+      <textarea class="names-area" id="w-names"
+        placeholder="Alan, Aishling, Sean, Dara, Christian&#10;&#10;or one per line:&#10;Alan&#10;Aishling&#10;Sean&#10;Dara&#10;Christian"
+        oninput="updateNameCount()"></textarea>
+      <div class="name-count" id="w-count"></div>
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="wizardTo(2)">Next: Choose Teams →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Teams per person -->
+    <div id="wstep-2" style="display:none">
+      <div class="w-title">How many teams per person?</div>
+      <div class="w-sub">Teams are drawn randomly from the 48 World Cup squads. Everyone in the draw gets the same number.</div>
+      <div class="tpp-grid">
+        <div class="tpp-opt selected" data-val="1" onclick="selectTPP(this)">
+          <div class="num">1</div><div class="lbl">team each</div>
+        </div>
+        <div class="tpp-opt" data-val="2" onclick="selectTPP(this)">
+          <div class="num">2</div><div class="lbl">teams each</div>
+        </div>
+        <div class="tpp-opt" data-val="3" onclick="selectTPP(this)">
+          <div class="num">3</div><div class="lbl">teams each</div>
+        </div>
+      </div>
+      <div class="calc-box empty" id="w-calc"></div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="wizardTo(1)">← Back</button>
+        <button class="btn btn-green" id="assign-btn" onclick="assignTeams()">Assign Teams Randomly →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Review -->
+    <div id="wstep-3" style="display:none">
+      <div class="w-title">Review Assignments</div>
+      <div class="w-sub">Teams have been randomly drawn. Hit re-draw if you want a fresh shuffle, or confirm to lock it in and launch your draw.</div>
+      <div class="card flush" style="margin-bottom:1.25rem">
+        <table class="review-table" id="w-review"></table>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="reRandomise()">↺ Re-draw</button>
+        <button class="btn btn-green" onclick="confirmWizard()">✅ Confirm &amp; Launch →</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── MAIN APP ───────────────────────────────────────── -->
+<div id="app">
+  <div class="app-header">
     <div style="min-width:0">
       <h1 id="app-title">Draw</h1>
       <div class="meta" id="app-meta"></div>
     </div>
-    <button class="signout" onclick="signOut()">Sign out</button>
-  </header>
+    <button class="switch-btn" onclick="switchDraw()">⇄ Switch Draw</button>
+  </div>
 
   <div class="tabs">
-    <button class="tab active" onclick="showTab('participants',this)">👥 Participants</button>
+    <button class="tab active" onclick="showTab('overview',this)">📊 Overview</button>
+    <button class="tab" onclick="showTab('participants',this)">👥 Participants</button>
     <button class="tab" onclick="showTab('whatsapp',this)">📱 WhatsApp</button>
     <button class="tab" onclick="showTab('preview',this)">📋 Preview &amp; Send</button>
   </div>
 
   <main>
+
+    <!-- OVERVIEW -->
+    <div class="section active" id="sec-overview">
+      <div class="ov-stats" id="ov-stats"></div>
+
+      <div class="card">
+        <h2>🏆 Current Standings</h2>
+        <div id="ov-standings"><div class="empty">Loading…</div></div>
+      </div>
+
+      <div class="card flush">
+        <div style="padding:1rem 1.25rem .5rem;font-size:.95rem;font-weight:600;color:var(--text2)">📅 Today's Fixtures</div>
+        <div id="ov-today"></div>
+      </div>
+
+      <div class="card flush">
+        <div style="padding:1rem 1.25rem .5rem;font-size:.95rem;font-weight:600;color:var(--text2)">📆 Upcoming Fixtures</div>
+        <div id="ov-upcoming"></div>
+      </div>
+    </div>
+
     <!-- PARTICIPANTS -->
-    <div class="section active" id="sec-participants">
+    <div class="section" id="sec-participants">
       <div class="toolbar">
         <button class="btn btn-green" onclick="openPModal()">+ Add Participant</button>
       </div>
-      <div class="card" style="padding:0;overflow:hidden">
+      <div class="card flush">
         <table>
           <thead><tr><th>Name</th><th>Teams Assigned</th><th></th></tr></thead>
           <tbody id="p-body"></tbody>
@@ -221,6 +412,7 @@ input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,
         <div id="prev-box" class="preview-box" style="display:none"></div>
       </div>
     </div>
+
   </main>
 </div>
 
@@ -250,16 +442,22 @@ input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,
 <div class="toast" id="toast"></div>
 
 <script>
-const slug   = location.pathname.replace(/^\/manage\//, '').replace(/\/$/, '');
-const PINKEY = 'wc_pin_' + slug;
-let   pin    = sessionStorage.getItem(PINKEY);
-let   draw   = null;
-let   teams  = [];
-let   editId = null;
+const slug    = location.pathname.replace(/^\/manage\//, '').replace(/\/$/, '');
+const PINKEY  = 'wc_pin_' + slug;
+const isSetup = new URLSearchParams(location.search).has('setup');
+let   pin     = sessionStorage.getItem(PINKEY);
+let   draw    = null;
+let   teams   = [];
+let   matches = [];
+let   editId  = null;
+
+// wizard state
+let wNames = [];
+let wTPP   = 1;
+let wUsers = [];
 
 // ── BOOT ─────────────────────────────────────────────
 (async () => {
-  // Humanise the slug as a placeholder title in the gate
   document.getElementById('gate-title').textContent =
     slug.replace(/-/g, ' ').replace(/\b./g, c => c.toUpperCase());
 
@@ -272,10 +470,11 @@ let   editId = null;
   if (!pin) showGate();
 })();
 
-// ── PIN GATE ─────────────────────────────────────────
+// ── GATE ─────────────────────────────────────────────
 function showGate() {
-  document.getElementById('gate').style.display = 'flex';
-  document.getElementById('app').classList.remove('show');
+  document.getElementById('gate').style.display   = 'flex';
+  document.getElementById('wizard').style.display = 'none';
+  document.getElementById('app').style.display    = 'none';
   setTimeout(() => document.getElementById('pin-input').focus(), 100);
 }
 
@@ -297,34 +496,46 @@ async function enter(tryPin) {
   return true;
 }
 
-function signOut() {
+function switchDraw() {
   sessionStorage.removeItem(PINKEY);
-  pin = null; draw = null;
-  document.getElementById('pin-input').value = '';
-  showGate();
+  location.href = '/';
 }
 
 // ── APP LOAD ─────────────────────────────────────────
 async function loadApp() {
-  draw = await post('data', {});
-  if (draw.error) { signOut(); return; }
+  draw    = await post('data', {});
+  matches = await fetch('/api/matches').then(r => r.json());
+  if (draw.error) { switchDraw(); return; }
 
   document.getElementById('gate').style.display = 'none';
-  document.getElementById('app').classList.add('show');
+
+  if (isSetup || (draw.users || []).length === 0) {
+    document.getElementById('wiz-title').textContent = draw.name;
+    document.getElementById('wizard').style.display = 'block';
+    return;
+  }
+
+  showMainApp();
+}
+
+function showMainApp() {
+  document.getElementById('wizard').style.display = 'none';
+  document.getElementById('app').style.display    = 'block';
   document.getElementById('app-title').textContent = draw.name;
   updateMeta();
-
-  document.getElementById('wa-gid').value  = draw.group?.callmebot_group_id || '';
-  document.getElementById('wa-key').value  = draw.group?.callmebot_apikey   || '';
+  document.getElementById('wa-gid').value = draw.group?.callmebot_group_id || '';
+  document.getElementById('wa-key').value = draw.group?.callmebot_apikey   || '';
   document.getElementById('prev-date').value =
     new Date().toLocaleDateString('en-CA', {timeZone:'Europe/Dublin'});
-
+  renderOverview();
   renderParticipants();
 }
 
 function updateMeta() {
   const n = (draw.users || []).length;
-  document.getElementById('app-meta').textContent = n + ' participant' + (n !== 1 ? 's' : '');
+  document.getElementById('app-meta').textContent =
+    n + ' participant' + (n !== 1 ? 's' : '') +
+    (draw.group?.callmebot_group_id ? ' · WhatsApp connected' : '');
 }
 
 // ── TABS ─────────────────────────────────────────────
@@ -333,6 +544,250 @@ function showTab(id, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
   btn.classList.add('active');
+}
+
+// ── OVERVIEW ─────────────────────────────────────────
+const POINTS = {
+  group:         { win:3,  draw:1, loss:0 },
+  round_of_32:   { win:4,  loss:0 },
+  round_of_16:   { win:6,  loss:0 },
+  quarter_final: { win:10, loss:0 },
+  semi_final:    { win:15, loss:0 },
+  third_place:   { win:18, loss:0 },
+  final:         { win:25, loss:12 }
+};
+
+function buildLeaderboard() {
+  const tmap = Object.fromEntries(teams.map(t => [t.id, t]));
+  return (draw.users || []).map(user => {
+    let total = 0;
+    const userTeams = (user.teams || []).map(tid => {
+      const team = tmap[tid]; if (!team) return null;
+      let pts = 0;
+      for (const m of matches) {
+        if (!m.played) continue;
+        const isH = m.homeTeam === tid, isA = m.awayTeam === tid;
+        if (!isH && !isA) continue;
+        const ts  = isH ? m.homeScore : m.awayScore;
+        const os  = isH ? m.awayScore : m.homeScore;
+        const res = ts > os ? 'win' : ts < os ? 'loss' : 'draw';
+        pts += (POINTS[m.stage] || {})[res] || 0;
+      }
+      total += pts;
+      return { team, points: pts };
+    }).filter(Boolean);
+    return { name: user.name, teams: userTeams, total };
+  }).sort((a, b) => b.total - a.total);
+}
+
+function renderOverview() {
+  const today    = new Date().toLocaleDateString('en-CA', {timeZone:'Europe/Dublin'});
+  const tmap     = Object.fromEntries(teams.map(t => [t.id, t]));
+  const lb       = buildLeaderboard();
+  const played   = matches.filter(m => m.played).length;
+
+  // Stat cards
+  document.getElementById('ov-stats').innerHTML = `
+    <div class="ov-stat"><div class="val">${(draw.users||[]).length}</div><div class="lbl">Participants</div></div>
+    <div class="ov-stat"><div class="val">${played}</div><div class="lbl">Played</div></div>
+    <div class="ov-stat"><div class="val">${matches.length - played}</div><div class="lbl">Remaining</div></div>
+    <div class="ov-stat"><div class="val">${lb[0]?.total ?? 0}</div><div class="lbl">Top Score</div></div>`;
+
+  // Standings
+  const medals = ['🥇','🥈','🥉'];
+  if (!lb.length) {
+    document.getElementById('ov-standings').innerHTML = '<div class="empty">No participants yet</div>';
+  } else {
+    document.getElementById('ov-standings').innerHTML = `
+      <table>
+        <thead><tr><th>#</th><th>Participant</th><th>Teams</th><th>Pts</th></tr></thead>
+        <tbody>${lb.map((row, i) => {
+          const rc = i===0?'rk1':i===1?'rk2':i===2?'rk3':'rkn';
+          const pills = (row.teams||[]).map(t =>
+            `<span class="team-pill">${t.team.flag} ${t.team.name}${t.points?` · ${t.points}pts`:''}</span>`
+          ).join('');
+          return `<tr>
+            <td><span class="rank-badge ${rc}">${medals[i]||(i+1)}</span></td>
+            <td><strong>${esc(row.name)}</strong></td>
+            <td style="line-height:2">${pills||'<span style="color:var(--muted);font-style:italic;font-size:.8rem">No teams</span>'}</td>
+            <td><span class="pts-big">${row.total}</span></td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>`;
+  }
+
+  // Team ownership map for clash detection
+  const owners = {};
+  for (const u of draw.users || [])
+    for (const tid of u.teams || []) {
+      if (!owners[tid]) owners[tid] = [];
+      owners[tid].push(u.name.split(' ')[0]);
+    }
+
+  function fixtureHTML(m) {
+    const h    = tmap[m.homeTeam], a = tmap[m.awayTeam];
+    const hOwn = owners[m.homeTeam], aOwn = owners[m.awayTeam];
+    const isClash = hOwn?.length && aOwn?.length;
+
+    if (isClash) {
+      // Determine result context for played matches
+      let resultNote = '';
+      if (m.played) {
+        const hWon = m.homeScore > m.awayScore;
+        const aWon = m.awayScore > m.homeScore;
+        const draw = m.homeScore === m.awayScore;
+        if (draw) resultNote = `<div class="clash-time">Draw — both score 1pt</div>`;
+        else resultNote = `<div class="clash-time">${hWon ? hOwn.join('/') : aOwn.join('/')} wins this clash 🏆</div>`;
+      }
+
+      const scoreCenter = m.played
+        ? `<div class="clash-score">${m.homeScore}–${m.awayScore}</div>${resultNote}`
+        : `<div class="clash-score upcoming">vs</div><div class="clash-time">${m.kickoff||'TBC'}</div>`;
+
+      return `<div class="clash-card">
+        <div class="clash-card-header">⚔️ Draw Clash</div>
+        <div class="clash-matchup">
+          <div class="clash-side">
+            <div class="clash-person">${hOwn.join(' & ')}</div>
+            <div class="clash-team">${h ? h.flag+' '+h.name : m.homeTeam}</div>
+          </div>
+          <div class="clash-center">${scoreCenter}</div>
+          <div class="clash-side clash-side-right">
+            <div class="clash-person">${aOwn.join(' & ')}</div>
+            <div class="clash-team">${a ? a.flag+' '+a.name : m.awayTeam}</div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    // Regular fixture row
+    const hName    = h ? `${h.flag} ${h.name}` : m.homeTeam;
+    const aName    = a ? `${a.flag} ${a.name}` : m.awayTeam;
+    const scoreHTML = m.played
+      ? `<span class="fixture-score">${m.homeScore}–${m.awayScore}</span>`
+      : `<span class="fixture-score upcoming">${m.kickoff||'TBC'}</span>`;
+    return `<div class="fixture-item">
+      <div class="fixture-teams">${hName} <small style="color:var(--muted);margin:0 .3rem">vs</small> ${aName}</div>
+      ${scoreHTML}
+    </div>`;
+  }
+
+  // Today
+  const todayM = matches.filter(m => m.date === today);
+  document.getElementById('ov-today').innerHTML = todayM.length
+    ? todayM.map(fixtureHTML).join('')
+    : '<div class="empty" style="padding:1.25rem">No fixtures today</div>';
+
+  // Upcoming — next 7 days, grouped by date, only show draw-relevant first then rest
+  const upcoming = matches
+    .filter(m => m.date > today && !m.played)
+    .sort((a,b) => (a.date+a.kickoff).localeCompare(b.date+b.kickoff))
+    .slice(0, 20);
+
+  if (!upcoming.length) {
+    document.getElementById('ov-upcoming').innerHTML =
+      '<div class="empty" style="padding:1.25rem">No upcoming fixtures</div>';
+  } else {
+    let lastDate = '', html = '';
+    for (const m of upcoming) {
+      if (m.date !== lastDate) {
+        lastDate = m.date;
+        const label = new Date(m.date + 'T12:00:00').toLocaleDateString('en-IE',
+          {weekday:'short', day:'numeric', month:'short'});
+        html += `<div class="fixture-date-header">${label}</div>`;
+      }
+      html += fixtureHTML(m);
+    }
+    document.getElementById('ov-upcoming').innerHTML = html;
+  }
+}
+
+// ── WIZARD ───────────────────────────────────────────
+function parseNames(raw) {
+  return raw.split(/[\n,]+/).map(n => n.trim()).filter(Boolean);
+}
+
+function updateNameCount() {
+  wNames = parseNames(document.getElementById('w-names').value);
+  const el = document.getElementById('w-count');
+  el.textContent = wNames.length ? `${wNames.length} participant${wNames.length !== 1 ? 's' : ''}` : '';
+}
+
+function selectTPP(el) {
+  document.querySelectorAll('.tpp-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  wTPP = parseInt(el.dataset.val, 10);
+  updateCalc();
+}
+
+function updateCalc() {
+  const total = wNames.length * wTPP;
+  const ok    = total <= 48 && wNames.length >= 2;
+  const el    = document.getElementById('w-calc');
+  if (!wNames.length) { el.className = 'calc-box empty'; el.textContent = ''; return; }
+  el.className = ok ? 'calc-box' : 'calc-box warn';
+  el.innerHTML = ok
+    ? `${wNames.length} people × ${wTPP} team${wTPP>1?'s':''} = <strong>${total} of 48 teams used</strong>`
+    : total > 48
+      ? `⚠️ ${wNames.length} × ${wTPP} = ${total} teams needed — only 48 available.`
+      : `⚠️ Add at least 2 participants.`;
+  document.getElementById('assign-btn').disabled = !ok;
+}
+
+function wizardTo(step) {
+  if (step === 2) {
+    updateNameCount();
+    if (wNames.length < 2) { toast('Add at least 2 names first'); return; }
+    updateCalc();
+  }
+  [1, 2, 3].forEach(s => {
+    document.getElementById('wstep-' + s).style.display = s === step ? 'block' : 'none';
+    const ind = document.getElementById('ind-' + s);
+    ind.classList.remove('active', 'done');
+    if (s === step) ind.classList.add('active');
+    if (s < step)   ind.classList.add('done');
+  });
+}
+
+async function assignTeams() {
+  updateNameCount();
+  if (wNames.length < 2 || wNames.length * wTPP > 48) {
+    toast('Check participant count and teams per person'); return;
+  }
+  const btn = document.getElementById('assign-btn');
+  btn.disabled = true; btn.textContent = 'Drawing…';
+
+  const r = await post('assign-teams', { userNames: wNames, teamsPerPerson: wTPP });
+  btn.disabled = false; btn.textContent = 'Assign Teams Randomly →';
+
+  if (r.error) { toast('❌ ' + r.error); return; }
+  wUsers = r.users;
+  draw.users = wUsers;
+  renderReview();
+  wizardTo(3);
+}
+
+function renderReview() {
+  const tmap  = Object.fromEntries(teams.map(t => [t.id, t]));
+  const heads = `<thead><tr><th>Participant</th>${[...Array(wTPP)].map((_,i)=>`<th>Team ${i+1}</th>`).join('')}</tr></thead>`;
+  const rows  = wUsers.map(u =>
+    `<tr><td><strong>${esc(u.name)}</strong></td>${(u.teams||[]).map(tid => {
+      const t = tmap[tid];
+      return `<td><span class="team-chip">${t ? t.flag+' '+t.name : tid}</span></td>`;
+    }).join('')}</tr>`
+  ).join('');
+  document.getElementById('w-review').innerHTML = heads + '<tbody>' + rows + '</tbody>';
+}
+
+async function reRandomise() {
+  await assignTeams();
+}
+
+async function confirmWizard() {
+  draw.users = wUsers;
+  document.getElementById('wizard').style.display = 'none';
+  showMainApp();
+  toast('🎉 Draw is live!');
 }
 
 // ── PARTICIPANTS ──────────────────────────────────────
@@ -351,7 +806,7 @@ function renderParticipants() {
       return `<span class="team-pill">${t ? t.flag + ' ' + t.name : id}</span>`;
     }).join('') || '<span style="color:var(--muted);font-style:italic;font-size:.78rem">None assigned</span>';
     return `<tr>
-      <td><strong>${esc(u.name)}</strong>${u.phone ? `<br><small style="color:var(--muted)">${esc(u.phone)}</small>` : ''}</td>
+      <td><strong>${esc(u.name)}</strong>${u.phone?`<br><small style="color:var(--muted)">${esc(u.phone)}</small>`:''}</td>
       <td>${pills}</td>
       <td style="white-space:nowrap">
         <button class="btn btn-sm btn-secondary" onclick="openPModal('${u.id}')">Edit</button>
@@ -362,23 +817,20 @@ function renderParticipants() {
 }
 
 function assignedTeams(excludeId) {
-  return new Set((draw.users || []).filter(u => u.id !== excludeId).flatMap(u => u.teams || []));
+  return new Set((draw.users||[]).filter(u=>u.id!==excludeId).flatMap(u=>u.teams||[]));
 }
 
 function openPModal(uid = null) {
   editId = uid;
-  const user = uid ? (draw.users || []).find(u => u.id === uid) : null;
+  const user = uid ? (draw.users||[]).find(u=>u.id===uid) : null;
   document.getElementById('pm-title').textContent = uid ? 'Edit Participant' : 'Add Participant';
   document.getElementById('pm-name').value  = user?.name  || '';
   document.getElementById('pm-phone').value = user?.phone || '';
-
-  const taken    = assignedTeams(uid);
-  const selected = new Set(user?.teams || []);
+  const taken = assignedTeams(uid), selected = new Set(user?.teams||[]);
   document.getElementById('pm-teams').innerHTML = teams.map(t => {
     const cls = taken.has(t.id) ? 'tag taken' : (selected.has(t.id) ? 'tag selected' : 'tag');
     return `<span class="${cls}" data-id="${t.id}" onclick="toggleTeam(this,'${t.id}',${taken.has(t.id)})">${t.flag} ${t.name}</span>`;
   }).join('');
-
   document.getElementById('p-modal').classList.add('open');
   setTimeout(() => document.getElementById('pm-name').focus(), 80);
 }
@@ -391,27 +843,27 @@ function toggleTeam(el, id, isTaken) {
 }
 
 async function saveParticipant() {
-  const name  = document.getElementById('pm-name').value.trim();
-  const phone = document.getElementById('pm-phone').value.trim();
-  const selTeams = [...document.querySelectorAll('#pm-teams .tag.selected')].map(e => e.dataset.id);
+  const name     = document.getElementById('pm-name').value.trim();
+  const phone    = document.getElementById('pm-phone').value.trim();
+  const selTeams = [...document.querySelectorAll('#pm-teams .tag.selected')].map(e=>e.dataset.id);
   if (!name) { toast('Enter a name'); return; }
-
-  const user = { id: editId || ('u' + Date.now()), name, phone, teams: selTeams };
+  const user = { id: editId||('u'+Date.now()), name, phone, teams: selTeams };
   draw.users = editId
-    ? (draw.users || []).map(u => u.id === editId ? user : u)
-    : [...(draw.users || []), user];
-
+    ? (draw.users||[]).map(u=>u.id===editId?user:u)
+    : [...(draw.users||[]), user];
   await save();
   closePModal();
   renderParticipants();
-  toast(editId ? '✅ Participant updated' : '✅ Participant added');
+  renderOverview();
+  toast(editId ? '✅ Updated' : '✅ Participant added');
 }
 
 async function removeP(id) {
   if (!confirm('Remove this participant?')) return;
-  draw.users = (draw.users || []).filter(u => u.id !== id);
+  draw.users = (draw.users||[]).filter(u=>u.id!==id);
   await save();
   renderParticipants();
+  renderOverview();
   toast('Removed');
 }
 
@@ -445,12 +897,12 @@ async function previewMsg() {
 
 async function sendNow() {
   const r = await post('send', {});
-  toast(r.sent ? '✅ Message sent to group!' : '❌ Failed — check WhatsApp config in the WhatsApp tab');
+  toast(r.sent ? '✅ Message sent to group!' : '❌ Failed — check WhatsApp config');
 }
 
 // ── HELPERS ───────────────────────────────────────────
 async function save() {
-  await post('save', {name: draw.name, description: draw.description, users: draw.users, group: draw.group});
+  await post('save', {name:draw.name, description:draw.description, users:draw.users, group:draw.group});
 }
 
 async function post(action, body) {
@@ -466,7 +918,7 @@ function toast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg; el.classList.add('show');
   clearTimeout(toastT);
-  toastT = setTimeout(() => el.classList.remove('show'), 3000);
+  toastT = setTimeout(() => el.classList.remove('show'), 3500);
 }
 
 function esc(s) {
