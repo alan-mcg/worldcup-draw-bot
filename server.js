@@ -350,7 +350,7 @@ async function handleManageApi(req, res, urlPath) {
 // ── SHARED HELPERS ───────────────────────────────────
 
 function buildPreview(draw, date) {
-  const { buildGroupMessage } = require('./whatsapp');
+  const { buildGroupMessage } = require('./messaging');
   const teams    = load('teams.json');
   const matches  = load('matches.json');
   const teamsMap = Object.fromEntries(teams.map(t => [t.id, t]));
@@ -363,7 +363,7 @@ function buildPreview(draw, date) {
 }
 
 async function sendToGroup(draw) {
-  const { sendDiscordMessage } = require('./whatsapp');
+  const { sendDiscordMessage } = require('./messaging');
   const preview = buildPreview(draw);
   const { discord_webhook } = draw.group || {};
   const result  = await sendDiscordMessage(discord_webhook, preview.message);

@@ -237,6 +237,56 @@ input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,
 .bg-gray{background:#f1f5f9;color:#475569}
 .bg-gold{background:var(--goldL);color:#92400e}
 
+/* ── PODIUM ──────────────────────────────────── */
+.podium-winner{
+  background:linear-gradient(135deg,#fef9c3,#fef3c7,#fffbeb);
+  border:2px solid #f59e0b;border-radius:16px;padding:2rem;
+  text-align:center;margin-bottom:1.25rem;
+  box-shadow:0 4px 24px rgba(245,158,11,.2);
+}
+.podium-winner .crown{font-size:3rem;line-height:1;margin-bottom:.5rem}
+.podium-winner .p-name{font-size:1.75rem;font-weight:800;color:#92400e;letter-spacing:-.3px}
+.podium-winner .p-pts{font-size:1.1rem;color:#b45309;font-weight:600;margin-top:.25rem}
+.podium-winner .p-teams{font-size:.82rem;color:#b45309;margin-top:.5rem;opacity:.8}
+
+.podium-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem}
+.podium-card{border-radius:14px;padding:1.5rem;text-align:center;border:1.5px solid var(--border);box-shadow:var(--shadow)}
+.podium-card.silver{background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-color:#cbd5e1}
+.podium-card.bronze{background:linear-gradient(135deg,#fff7ed,#ffedd5);border-color:#fdba74}
+.podium-card .medal{font-size:2rem;line-height:1;margin-bottom:.35rem}
+.podium-card .p-name{font-size:1.1rem;font-weight:700;color:var(--text)}
+.podium-card .p-pts{font-size:.875rem;color:var(--muted);font-weight:500;margin-top:.2rem}
+
+.podium-loser{
+  background:linear-gradient(135deg,#fef2f2,#fff);
+  border:2px dashed #fca5a5;border-radius:16px;padding:2rem;
+  text-align:center;margin-bottom:1.25rem;position:relative;overflow:hidden;
+}
+.podium-loser::before{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(220,38,38,.03) 10px,rgba(220,38,38,.03) 20px)}
+.podium-loser .loser-icon{font-size:3rem;line-height:1;margin-bottom:.5rem;filter:grayscale(.3)}
+.podium-loser .p-name{font-size:1.6rem;font-weight:800;color:#dc2626;letter-spacing:-.2px;text-decoration:line-through;text-decoration-color:rgba(220,38,38,.4)}
+.podium-loser .p-pts{font-size:1rem;color:#ef4444;font-weight:600;margin-top:.25rem}
+.podium-loser .shame-tag{display:inline-block;background:#dc2626;color:#fff;border-radius:20px;padding:.2rem .875rem;font-size:.75rem;font-weight:700;margin-top:.75rem;letter-spacing:.5px;text-transform:uppercase}
+.laugh-btn{
+  margin-top:1.1rem;background:#dc2626;color:#fff;border:none;border-radius:10px;
+  padding:.65rem 1.5rem;font-size:1rem;font-weight:700;cursor:pointer;
+  font-family:inherit;transition:.15s;display:inline-flex;align-items:center;gap:.4rem;
+}
+.laugh-btn:hover{background:#b91c1c;transform:scale(1.04)}
+.laugh-btn:active{transform:scale(.97)}
+
+/* Falling emoji rain */
+.emoji-rain{
+  position:fixed;top:-60px;pointer-events:none;z-index:9999;
+  font-size:2rem;
+  user-select:none;
+}
+@keyframes emojifall{
+  0%{transform:translateY(0) rotate(0deg);opacity:1}
+  80%{opacity:1}
+  100%{transform:translateY(110vh) rotate(360deg);opacity:0}
+}
+
 /* ── RESPONSIVE ─────────────────────────────── */
 @media(max-width:640px){
   /* Header */
@@ -429,7 +479,8 @@ input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,
   <div class="tabs">
     <button class="tab active" onclick="showTab('overview',this)">📊 Overview</button>
     <button class="tab" onclick="showTab('participants',this)">👥 Participants</button>
-    <button class="tab" onclick="showTab('whatsapp',this)">💬 Discord</button>
+    <button class="tab" onclick="showTab('podium',this)">🏆 Podium</button>
+    <button class="tab" onclick="showTab('discord',this)">💬 Discord</button>
   </div>
 
   <main>
@@ -464,14 +515,19 @@ input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,
       </div>
     </div>
 
+    <!-- PODIUM -->
+    <div class="section" id="sec-podium">
+      <div id="podium-content"></div>
+    </div>
+
     <!-- DISCORD -->
-    <div class="section" id="sec-whatsapp">
+    <div class="section" id="sec-discord">
       <div class="card">
         <h2>💬 Discord Setup</h2>
         <div class="info-blue info-box">
           In your Discord server, go to a channel's <strong>Settings → Integrations → Webhooks</strong>, create a new webhook, and paste the URL below.
         </div>
-        <div class="form-row"><label>Webhook URL</label><input type="text" id="wa-webhook" placeholder="https://discord.com/api/webhooks/…"/></div>
+        <div class="form-row"><label>Webhook URL</label><input type="text" id="discord-webhook" placeholder="https://discord.com/api/webhooks/…"/></div>
         <div style="display:flex;gap:.5rem;margin-top:.875rem;flex-wrap:wrap">
           <button class="btn btn-green" onclick="saveDiscord()">💾 Save</button>
           <button class="btn btn-secondary" onclick="sendTest()">📤 Send Test Message</button>
@@ -595,7 +651,7 @@ function showMainApp() {
   document.getElementById('app').style.display    = 'block';
   document.getElementById('app-title').textContent = draw.name;
   updateMeta();
-  document.getElementById('wa-webhook').value = draw.group?.discord_webhook || '';
+  document.getElementById('discord-webhook').value = draw.group?.discord_webhook || '';
   document.getElementById('prev-date').value =
     new Date().toLocaleDateString('en-CA', {timeZone:'Europe/Dublin'});
   renderOverview();
@@ -615,17 +671,18 @@ function showTab(id, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
   btn.classList.add('active');
+  if (id === 'podium') renderPodium();
 }
 
 // ── OVERVIEW ─────────────────────────────────────────
 const POINTS = {
-  group:         { win:3,  draw:1, loss:0 },
-  round_of_32:   { win:4,  loss:0 },
-  round_of_16:   { win:6,  loss:0 },
-  quarter_final: { win:10, loss:0 },
-  semi_final:    { win:15, loss:0 },
-  third_place:   { win:18, loss:0 },
-  final:         { win:25, loss:12 }
+  group:         { win:3, draw:1, loss:0 },
+  round_of_32:   { win:3, draw:1, loss:0 },
+  round_of_16:   { win:3, draw:1, loss:0 },
+  quarter_final: { win:3, draw:1, loss:0 },
+  semi_final:    { win:3, draw:1, loss:0 },
+  third_place:   { win:3, draw:1, loss:0 },
+  final:         { win:3, draw:1, loss:0 }
 };
 
 function buildLeaderboard() {
@@ -756,6 +813,101 @@ function renderOverview() {
       html += fixtureHTML(m);
     }
     document.getElementById('ov-upcoming').innerHTML = html;
+  }
+}
+
+// ── PODIUM ───────────────────────────────────────────
+function renderPodium() {
+  const lb  = buildLeaderboard();
+  const el  = document.getElementById('podium-content');
+  const tmap = Object.fromEntries(teams.map(t => [t.id, t]));
+
+  if (!lb.length) {
+    el.innerHTML = '<div class="empty" style="padding:2rem;text-align:center">No participants yet</div>';
+    return;
+  }
+
+  // ── 1. LAST MAN STANDING ─────────────────────────────
+  const finalMatch = matches.find(m => m.stage === 'final');
+  let lmsHTML = '';
+  if (finalMatch && finalMatch.played && finalMatch.homeTeam && finalMatch.awayTeam) {
+    const winTeamId = finalMatch.homeScore > finalMatch.awayScore
+      ? finalMatch.homeTeam : finalMatch.awayTeam;
+    const winTeam   = tmap[winTeamId];
+    const lmsUser   = (draw.users || []).find(u => (u.teams || []).includes(winTeamId));
+    lmsHTML = `
+      <div class="podium-winner">
+        <div class="crown">🏆</div>
+        <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:1.2px;color:#b45309;font-weight:700;margin-bottom:.4rem">Last Man Standing — World Cup Winner</div>
+        <div class="p-name">${lmsUser ? esc(lmsUser.name) : '<span style="opacity:.6">Unowned team</span>'}</div>
+        ${winTeam ? `<div class="p-pts" style="margin-top:.3rem">${winTeam.flag} ${esc(winTeam.name)}</div>` : ''}
+      </div>`;
+  } else {
+    // Final not yet played — show finalists if known
+    const homeTeam = finalMatch?.homeTeam ? tmap[finalMatch.homeTeam] : null;
+    const awayTeam = finalMatch?.awayTeam ? tmap[finalMatch.awayTeam] : null;
+    const finalistLine = homeTeam && awayTeam
+      ? `<div style="font-size:.9rem;color:#b45309;margin-top:.5rem">${homeTeam.flag} ${esc(homeTeam.name)} vs ${awayTeam.flag} ${esc(awayTeam.name)}</div>`
+      : `<div style="font-size:.85rem;color:#b45309;opacity:.7;margin-top:.5rem">Finalists TBC</div>`;
+    const dateStr = finalMatch?.date
+      ? new Date(finalMatch.date + 'T12:00:00').toLocaleDateString('en-IE', {day:'numeric',month:'long',year:'numeric'})
+      : '';
+    lmsHTML = `
+      <div class="podium-winner" style="opacity:.85">
+        <div class="crown">🏆</div>
+        <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:1.2px;color:#b45309;font-weight:700;margin-bottom:.4rem">Last Man Standing — World Cup Winner</div>
+        <div class="p-name" style="font-size:1.4rem;opacity:.5">TBC</div>
+        ${finalistLine}
+        ${dateStr ? `<div style="font-size:.78rem;color:#b45309;opacity:.6;margin-top:.3rem">Final: ${dateStr}</div>` : ''}
+      </div>`;
+  }
+
+  // ── 2. HIGHEST POINTS ────────────────────────────────
+  const topPoints = lb[0];
+  const topTeamPills = (topPoints.teams || [])
+    .sort((a, b) => b.points - a.points)
+    .map(t => `<span class="team-pill">${t.team.flag} ${t.team.name} · ${t.points}pts</span>`)
+    .join('');
+  const highHTML = `
+    <div class="podium-winner" style="background:linear-gradient(135deg,#eff6ff,#dbeafe,#eff6ff);border-color:#3b82f6;box-shadow:0 4px 24px rgba(59,130,246,.18)">
+      <div class="crown" style="filter:hue-rotate(200deg)">🏅</div>
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:1.2px;color:#1d4ed8;font-weight:700;margin-bottom:.4rem">Highest Points in Tournament</div>
+      <div class="p-name" style="color:#1e3a8a">${esc(topPoints.name)}</div>
+      <div class="p-pts" style="color:#1d4ed8">${topPoints.total} pts</div>
+      <div class="p-teams" style="color:#1d4ed8;line-height:2;margin-top:.5rem">${topTeamPills || '<span style="opacity:.5">No matches played yet</span>'}</div>
+    </div>`;
+
+  // ── 3. BIGGEST LOSER ─────────────────────────────────
+  const loser = lb[lb.length - 1];
+  const loserTeamPills = (loser.teams || [])
+    .map(t => `<span class="team-pill" style="background:#fee2e2;color:#dc2626;border-color:#fca5a5">${t.team.flag} ${t.team.name} · ${t.points}pts</span>`)
+    .join('');
+  const loserHTML = lb.length > 1 ? `
+    <div class="podium-loser">
+      <div class="loser-icon">😂</div>
+      <div style="font-size:.78rem;color:#dc2626;margin:.4rem 0 .1rem;font-weight:600;text-transform:uppercase;letter-spacing:.8px">Biggest Loser</div>
+      <div class="p-name">${esc(loser.name)}</div>
+      <div class="p-pts">${loser.total} pts</div>
+      <div style="margin:.6rem 0 .8rem;line-height:2">${loserTeamPills || '<span style="font-size:.8rem;opacity:.5">No matches played yet</span>'}</div>
+      <button class="laugh-btn" onclick="laughAtLoser()">😂 Laugh at ${esc(loser.name.split(' ')[0])}</button>
+    </div>` : '';
+
+  el.innerHTML = lmsHTML + highHTML + loserHTML;
+}
+
+function laughAtLoser() {
+  const count = 60;
+  for (let i = 0; i < count; i++) {
+    const duration = (2 + Math.random() * 2.5).toFixed(2);
+    const delay    = (Math.random() * 1.5).toFixed(2);
+    const em = document.createElement('div');
+    em.className   = 'emoji-rain';
+    em.textContent = '😂';
+    em.style.left      = (Math.random() * 98) + 'vw';
+    em.style.fontSize  = (1.4 + Math.random() * 1.8) + 'rem';
+    em.style.animation = `emojifall ${duration}s ${delay}s linear forwards`;
+    document.body.appendChild(em);
+    em.addEventListener('animationend', () => em.remove());
   }
 }
 
@@ -925,7 +1077,7 @@ function renderParticipants() {
       return `<span class="team-pill">${t ? t.flag + ' ' + t.name : id}</span>`;
     }).join('') || '<span style="color:var(--muted);font-style:italic;font-size:.78rem">None assigned</span>';
     return `<tr>
-      <td><strong>${esc(u.name)}</strong>${u.phone?`<br><small style="color:var(--muted)">${esc(u.phone)}</small>`:''}</td>
+      <td><strong>${esc(u.name)}</strong></td>
       <td>${pills}</td>
       <td></td>
     </tr>`;
@@ -1029,7 +1181,7 @@ function closePModal() { document.getElementById('p-modal').classList.remove('op
 
 // ── DISCORD ───────────────────────────────────────────
 async function saveDiscord() {
-  draw.group = { discord_webhook: document.getElementById('wa-webhook').value.trim() };
+  draw.group = { discord_webhook: document.getElementById('discord-webhook').value.trim() };
   await save();
   toast('✅ Discord config saved');
 }

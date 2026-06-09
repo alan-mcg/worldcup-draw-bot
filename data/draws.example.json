@@ -4,12 +4,11 @@
     "name": "Work Draw 🏢",
     "description": "Office World Cup sweepstake",
     "group": {
-      "callmebot_group_id": "",
-      "callmebot_apikey": ""
+      "discord_webhook": ""
     },
     "users": [
-      { "id": "u1", "name": "Alice",  "phone": "+353871111111", "teams": ["FRA", "BRA", "ESP"] },
-      { "id": "u2", "name": "Bob",    "phone": "+353872222222", "teams": ["ENG", "GER", "ARG"] }
+      { "id": "u1", "name": "Alice", "teams": ["FRA", "BRA", "ESP"] },
+      { "id": "u2", "name": "Bob",   "teams": ["ENG", "GER", "ARG"] }
     ]
   }
 ]

@@ -382,7 +382,6 @@ input:focus,select:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px
   <div class="modal">
     <h2 id="user-modal-title">Add Participant</h2>
     <div class="form-row"><label>Name</label><input type="text" id="u-name" placeholder="Full name"/></div>
-    <div class="form-row"><label>WhatsApp Phone (E.164)</label><input type="tel" id="u-phone" placeholder="+353871234567"/></div>
     <div class="form-row"><label>Assigned Teams (up to 3)</label><div class="tag-grid" id="team-picker"></div></div>
     <div style="display:flex;gap:.6rem;margin-top:1.1rem">
       <button class="btn btn-primary" onclick="saveUser()">Save</button>
@@ -556,7 +555,7 @@ function buildLeaderboardLocal(draw) {
     }).filter(Boolean);
     return {user,teams,total};
   }).sort((a,b)=>b.total-a.total);
-  return standings.map((s,i)=>({rank:i+1,id:s.user.id,name:s.user.name,phone:s.user.phone,teams:s.teams,total:s.total}));
+  return standings.map((s,i)=>({rank:i+1,id:s.user.id,name:s.user.name,teams:s.teams,total:s.total}));
 }
 
 async function renderDrawPage() {
@@ -725,7 +724,7 @@ function openUserModal(userId, drawId) {
   const user=userId?(draw?.users||[]).find(u=>u.id===userId):null;
   $('user-modal-title').textContent=userId?'Edit Participant':'Add Participant';
   $('u-name').value=user?.name||'';
-  $('u-phone').value=user?.phone||'';
+
   $('user-modal').dataset.drawId=drawId;
   const picker=$('team-picker');
   picker.innerHTML=allTeams.map(t=>`<span class="tag ${user?.teams?.includes(t.id)?'selected':''}" data-id="${t.id}" onclick="toggleTag(this)">${t.flag} ${t.name} <span class="group-tag">${t.group}</span></span>`).join('');
@@ -739,15 +738,15 @@ function toggleTag(el) {
 }
 
 async function saveUser() {
-  const name=$('u-name').value.trim(), phone=$('u-phone').value.trim();
-  if(!name||!phone){toast('Name and phone required');return;}
+  const name=$('u-name').value.trim();
+  if(!name){toast('Name required');return;}
   const teams=[...document.querySelectorAll('#team-picker .tag.selected')].map(e=>e.dataset.id);
   const drawId=$('user-modal').dataset.drawId;
   const draws=allDraws.map(d=>{
     if(d.id!==drawId)return d;
     const users=[...(d.users||[])];
-    if(editingUserId){const i=users.findIndex(u=>u.id===editingUserId);users[i]={...users[i],name,phone,teams};}
-    else users.push({id:'u'+Date.now(),name,phone,teams});
+    if(editingUserId){const i=users.findIndex(u=>u.id===editingUserId);users[i]={...users[i],name,teams};}
+    else users.push({id:'u'+Date.now(),name,teams});
     return {...d,users};
   });
   await api('POST','/api/draws',draws);

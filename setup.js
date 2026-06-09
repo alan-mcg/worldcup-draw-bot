@@ -46,5 +46,5 @@ function printNextSteps() {
   console.log('📋  Next steps:');
   console.log('  1.  npm start  →  open http://localhost:3000');
   console.log('  2.  Create a draw, add participants, assign teams');
-  console.log('  3.  Set up CallMeBot for each WhatsApp group (see README)\n');
+  console.log('  3.  Add a Discord webhook URL in each draw\'s Discord tab\n');
 }
