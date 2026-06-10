@@ -523,6 +523,13 @@ input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,
     <!-- DISCORD -->
     <div class="section" id="sec-discord">
       <div class="card">
+        <h2>🔗 Share Draw</h2>
+        <p style="color:var(--muted);font-size:.875rem;margin-bottom:.875rem">Copy the message below and send it to your group.</p>
+        <textarea id="share-msg" readonly style="width:100%;min-height:160px;border:1.5px solid var(--border);border-radius:8px;padding:.875rem;font-size:.84rem;font-family:inherit;resize:none;background:#f8fafc;color:var(--text);line-height:1.75"></textarea>
+        <button class="btn btn-green" style="margin-top:.75rem" onclick="copyShareMsg()">📋 Copy Message</button>
+      </div>
+
+      <div class="card" style="margin-top:1rem">
         <h2>💬 Discord Setup</h2>
         <div class="info-blue info-box">
           In your Discord server, go to a channel's <strong>Settings → Integrations → Webhooks</strong>, create a new webhook, and paste the URL below.
@@ -652,6 +659,7 @@ function showMainApp() {
   document.getElementById('app-title').textContent = draw.name;
   updateMeta();
   document.getElementById('discord-webhook').value = draw.group?.discord_webhook || '';
+  renderShareMsg();
   document.getElementById('prev-date').value =
     new Date().toLocaleDateString('en-CA', {timeZone:'Europe/Dublin'});
   renderOverview();
@@ -1180,6 +1188,23 @@ async function removeP(id) {
 function closePModal() { document.getElementById('p-modal').classList.remove('open'); editId = null; }
 
 // ── DISCORD ───────────────────────────────────────────
+function renderShareMsg() {
+  const url = window.location.origin + '/manage/' + slug;
+  const pin = sessionStorage.getItem(PINKEY) || '——';
+  document.getElementById('share-msg').value =
+    `Hey everyone! 🎉 Your World Cup 2026 sweepstake draw is set up and ready to go.\n\n` +
+    `🏆 Draw: ${draw.name}\n` +
+    `🔑 PIN: ${pin}\n` +
+    `🔗 Link: ${url}\n\n` +
+    `Open the link, enter the draw name and PIN to see your teams, live standings and fixtures.`;
+}
+
+function copyShareMsg() {
+  navigator.clipboard.writeText(document.getElementById('share-msg').value)
+    .then(() => toast('✅ Copied!'))
+    .catch(() => { document.getElementById('share-msg').select(); document.execCommand('copy'); toast('✅ Copied!'); });
+}
+
 async function saveDiscord() {
   draw.group = { discord_webhook: document.getElementById('discord-webhook').value.trim() };
   await save();
