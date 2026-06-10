@@ -1055,13 +1055,29 @@ Good luck! ⚽`;
   [1,2,3].forEach(n => document.getElementById('ind-'+n).classList.add('done'));
 }
 
+function copyText(text, btn, label) {
+  const done = () => { if (btn) { btn.textContent = '✅ Copied!'; setTimeout(() => btn.textContent = label || '📋 Copy Message', 2000); } toast('✅ Copied!'); };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+  } else {
+    fallbackCopy(text, done);
+  }
+}
+
+function fallbackCopy(text, cb) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); cb(); } catch(e) { toast('❌ Copy failed — please copy manually'); }
+  document.body.removeChild(ta);
+}
+
 function copyWizardShare() {
-  const msg = document.getElementById('w-share-msg').value;
-  navigator.clipboard.writeText(msg).then(() => {
-    const btn = document.querySelector('#wstep-4 .btn-green');
-    btn.textContent = '✅ Copied!';
-    setTimeout(() => btn.textContent = '📋 Copy Message', 2000);
-  });
+  const btn = document.querySelector('#wstep-4 .btn-green');
+  copyText(document.getElementById('w-share-msg').value, btn, '📋 Copy Message');
 }
 
 function goToApp() {
@@ -1200,9 +1216,8 @@ function renderShareMsg() {
 }
 
 function copyShareMsg() {
-  navigator.clipboard.writeText(document.getElementById('share-msg').value)
-    .then(() => toast('✅ Copied!'))
-    .catch(() => { document.getElementById('share-msg').select(); document.execCommand('copy'); toast('✅ Copied!'); });
+  const btn = document.querySelector('#sec-discord .btn-green');
+  copyText(document.getElementById('share-msg').value, btn, '📋 Copy Message');
 }
 
 async function saveDiscord() {
