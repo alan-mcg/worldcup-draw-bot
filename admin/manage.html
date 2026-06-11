@@ -1041,7 +1041,8 @@ async function confirmWizard() {
 
 🏆 Draw: ${draw.name}
 🔑 PIN: ${drawPin}
-🔗 Link: ${url}
+
+${url}
 
 Open the link, enter the draw name and PIN to see your teams, live standings and fixtures.
 
@@ -1210,8 +1211,8 @@ function renderShareMsg() {
   document.getElementById('share-msg').value =
     `Hey everyone! 🎉 Your World Cup 2026 sweepstake draw is set up and ready to go.\n\n` +
     `🏆 Draw: ${draw.name}\n` +
-    `🔑 PIN: ${pin}\n` +
-    `🔗 ${url}\n\n` +
+    `🔑 PIN: ${pin}\n\n` +
+    `${url}\n\n` +
     `Open the link, enter the draw name and PIN to see your teams, live standings and fixtures.`;
 }
 
