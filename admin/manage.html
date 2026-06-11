@@ -627,6 +627,7 @@ async function enter(tryPin) {
     body: JSON.stringify({pin: tryPin})
   }).then(r => r.json());
   if (!r.ok) return false;
+  pin = tryPin;
   await loadApp();
   return true;
 }
