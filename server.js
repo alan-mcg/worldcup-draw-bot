@@ -381,25 +381,6 @@ setInterval(() => {
   syncToday().catch(e => console.error('Auto-sync error:', e.message));
 }, 30 * 60 * 1000);
 
-function scheduleDailySend() {
-  const config = load('config.json');
-  const [h, m] = (config.send_time || '09:00').split(':').map(Number);
-  const now    = new Date();
-  const next   = new Date(now);
-  next.setHours(h, m, 0, 0);
-  if (next <= now) next.setDate(next.getDate() + 1);
-
-  setTimeout(() => {
-    console.log(`\n🚀 [${new Date().toLocaleString()}] Sending daily updates...`);
-    const { execSync } = require('child_process');
-    try { execSync('node bot.js', { stdio: 'inherit', cwd: __dirname }); }
-    catch (e) { console.error('Daily send error:', e.message); }
-    scheduleDailySend();
-  }, next - now);
-
-  const hhmm = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-  console.log(`   📤 Daily send scheduled for ${hhmm} (in ${Math.round((next - now) / 60000)} min)`);
-}
 
 // ── SERVER ───────────────────────────────────────────
 
@@ -432,8 +413,6 @@ const server = http.createServer(async (req, res) => {
 server.listen(3000, () => {
   console.log('\n🌍 World Cup Bot     → http://localhost:3000');
   console.log('   🆕 New draw setup  → http://localhost:3000/setup\n');
-
-  scheduleDailySend();
 
   const config = load('config.json');
   if (!config.last_synced) {
