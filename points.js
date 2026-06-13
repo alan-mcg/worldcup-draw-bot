@@ -9,7 +9,7 @@ function loadJSON(f) { return JSON.parse(fs.readFileSync(path.join(DATA_DIR, f),
 function getTeamResults(teamId, matches) {
   const results = [];
   for (const m of matches) {
-    if (!m.played) continue;
+    if (!m.played || m.homeScore === null || m.awayScore === null) continue;
     const isHome = m.homeTeam === teamId;
     const isAway = m.awayTeam === teamId;
     if (!isHome && !isAway) continue;

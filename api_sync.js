@@ -87,10 +87,10 @@ async function syncAllFixtures() {
     existing.filter(m => m.sourceId).map(m => [m.sourceId, m])
   );
 
-  // Preserve scores for already-played matches; overwrite everything else
+  // Preserve scores only if already stored with real (non-null) scores; otherwise refresh from API
   const merged = fetched.map(m => {
     const ex = existingById[m.sourceId];
-    return (ex && ex.played) ? ex : m;
+    return (ex && ex.played && ex.homeScore !== null && ex.awayScore !== null) ? ex : m;
   });
 
   // Keep any manually-entered matches that don't overlap a synced fixture
