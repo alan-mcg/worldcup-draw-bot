@@ -218,12 +218,19 @@ function checkAdminSession(req) {
 }
 
 async function handleAdminLogin(req, res) {
+  const lockedMins = checkLocked('admin');
+  if (lockedMins) return json(res, { ok: false, error: `Too many attempts — try again in ${lockedMins} min` });
+
   const { password } = await parseBody(req);
   let cfg;
   try { cfg = load('admin.json'); }
   catch { return json(res, { error: 'Admin not configured — run: node setup-admin.js' }, 503); }
   const hash = await hashPin(String(password || ''), cfg.passwordSalt);
-  if (hash !== cfg.passwordHash) return json(res, { ok: false, error: 'Incorrect password' });
+  if (hash !== cfg.passwordHash) {
+    recordFail('admin');
+    return json(res, { ok: false, error: 'Incorrect password' });
+  }
+  recordSuccess('admin');
   return json(res, { ok: true, token: createAdminSession() });
 }
 
