@@ -613,6 +613,8 @@ let wUsers = [];
   if (pin && !await enter(pin)) {
     sessionStorage.removeItem(PINKEY);
     pin = null;
+  } else if (pin) {
+    fetch('/api/draw-accessed', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug,draw:draw?.name||slug})});
   }
   if (!pin) showGate();
 })();

@@ -67,7 +67,7 @@ function audit(action, details = {}) {
   try { log = JSON.parse(fs.readFileSync(AUDIT_FILE, 'utf8')); } catch {}
   const last = log[0];
   if (last && last.action === action && last.slug === details.slug &&
-      Date.now() - new Date(last.ts).getTime() < 5000) return;
+      Date.now() - new Date(last.ts).getTime() < 30000) return;
   log.unshift({ ts: new Date().toISOString(), action, ...details });
   if (log.length > MAX_AUDIT) log.length = MAX_AUDIT;
   fs.writeFileSync(AUDIT_FILE, JSON.stringify(log));
