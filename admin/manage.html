@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>⚽ Manage Draw — World Cup 2026</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#16a34a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="SweepWC">
+<link rel="apple-touch-icon" href="/icon.svg">
 <style>
 :root{
   --g:#16a34a;--gL:#dcfce7;--gS:#f0fdf4;--gD:#15803d;--gDD:#14532d;
@@ -1285,6 +1291,55 @@ async function refreshMatches() {
 }
 
 setInterval(refreshMatches, 60000);
+
+// ── PWA INSTALL PROMPT ───────────────────────────────
+(function() {
+  if (window.matchMedia('(display-mode: standalone)').matches) return; // already installed
+
+  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isAndroidOrDesktop = !isIos;
+
+  let deferredPrompt = null;
+
+  const banner = document.getElementById('pwa-banner');
+  const iosMsg  = document.getElementById('pwa-ios');
+  const installBtn = document.getElementById('pwa-install-btn');
+
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    banner.style.display = 'flex';
+  });
+
+  if (isIos) {
+    banner.style.display = 'flex';
+    installBtn.style.display = 'none';
+    iosMsg.style.display = 'block';
+  }
+
+  installBtn && installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    if (outcome === 'accepted') banner.style.display = 'none';
+  });
+
+  document.getElementById('pwa-dismiss') && document.getElementById('pwa-dismiss').addEventListener('click', () => {
+    banner.style.display = 'none';
+  });
+})();
 </script>
+
+<!-- PWA install banner -->
+<div id="pwa-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#fff;border-top:1.5px solid #e2e8f0;padding:.875rem 1rem;align-items:center;gap:.75rem;box-shadow:0 -4px 16px rgba(0,0,0,.08)">
+  <span style="font-size:1.6rem;line-height:1">⚽</span>
+  <div style="flex:1;min-width:0">
+    <div style="font-weight:700;font-size:.88rem;color:#0f172a">Add SweepWC to your home screen</div>
+    <div id="pwa-ios" style="display:none;font-size:.78rem;color:#64748b;margin-top:.15rem">Tap <strong>Share</strong> then <strong>"Add to Home Screen"</strong></div>
+  </div>
+  <button id="pwa-install-btn" style="background:#16a34a;color:#fff;border:none;border-radius:8px;padding:.45rem .9rem;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap">Add</button>
+  <button id="pwa-dismiss" style="background:none;border:none;font-size:1.2rem;color:#94a3b8;cursor:pointer;padding:.2rem .4rem;line-height:1">&times;</button>
+</div>
 </body>
 </html>
