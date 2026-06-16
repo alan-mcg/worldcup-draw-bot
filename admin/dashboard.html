@@ -251,6 +251,7 @@ input:focus,select:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px
   <div style="margin-top:auto">
     <div class="sidebar-section">System</div>
     <button class="sidebar-btn" data-sec="settings" onclick="showSection('settings',this)">⚙️ Settings</button>
+    <button class="sidebar-btn" data-sec="audit" onclick="showSection('audit',this);loadAudit()">🔍 Audit Log</button>
   </div>
 </aside>
 
@@ -331,6 +332,18 @@ input:focus,select:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px
       </div>
     </div>
     <button class="btn btn-blue" onclick="saveConfig()">Save Settings</button>
+  </div>
+</div>
+
+<!-- AUDIT LOG -->
+<div id="sec-audit" class="section">
+  <div class="page-title">🔍 Audit Log</div>
+  <div class="card">
+    <h2>Recent Activity</h2>
+    <table>
+      <thead><tr><th>Time</th><th>Event</th><th>Draw</th><th>IP</th></tr></thead>
+      <tbody id="audit-tbody"><tr><td colspan="4" style="color:var(--muted);text-align:center">Loading…</td></tr></tbody>
+    </table>
   </div>
 </div>
 
@@ -887,6 +900,34 @@ async function saveConfig(){
   await api('POST','/api/config',cfg);
   appConfig=cfg;
   toast('✅ Settings saved!');
+}
+
+// ── AUDIT LOG ──────────────────────────────────────
+const ACTION_LABELS = {
+  draw_login_success: { label: '✅ Draw unlocked',     style: 'color:#16a34a' },
+  draw_login_fail:    { label: '❌ Wrong PIN',          style: 'color:#dc2626' },
+  draw_locked:        { label: '🔒 Draw locked out',   style: 'color:#d97706' },
+  admin_login_success:{ label: '✅ Admin login',        style: 'color:#16a34a' },
+  admin_login_fail:   { label: '❌ Admin wrong password',style: 'color:#dc2626' },
+  admin_locked:       { label: '🔒 Admin locked out',  style: 'color:#d97706' },
+  draw_created:       { label: '🆕 Draw created',      style: 'color:#2563eb' },
+  draw_deleted:       { label: '🗑️ Draw deleted',      style: 'color:#7c3aed' },
+};
+
+async function loadAudit() {
+  const log = await api('GET', '/api/admin/audit');
+  const tbody = document.getElementById('audit-tbody');
+  if (!log?.length) { tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);text-align:center">No activity yet</td></tr>'; return; }
+  tbody.innerHTML = log.map(e => {
+    const { label, style } = ACTION_LABELS[e.action] || { label: e.action, style: '' };
+    const time = new Date(e.ts).toLocaleString('en-IE', { dateStyle: 'short', timeStyle: 'short' });
+    return `<tr>
+      <td style="white-space:nowrap;color:var(--muted);font-size:.8rem">${time}</td>
+      <td style="${style};font-weight:500">${label}</td>
+      <td style="font-size:.85rem">${e.draw || e.slug || '—'}</td>
+      <td style="font-size:.8rem;color:var(--muted);font-family:monospace">${e.ip || '—'}</td>
+    </tr>`;
+  }).join('');
 }
 
 // ── ADMIN AUTH ─────────────────────────────────────

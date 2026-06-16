@@ -57,6 +57,22 @@ function hashPin(pin, salt) {
   );
 }
 
+// ── AUDIT LOG ────────────────────────────────────────
+const AUDIT_FILE = path.join(DATA_DIR, 'audit.json');
+const MAX_AUDIT  = 500;
+
+function getIp(req) {
+  return req.headers['x-real-ip'] || req.socket.remoteAddress || '?';
+}
+
+function audit(action, details = {}) {
+  let log = [];
+  try { log = JSON.parse(fs.readFileSync(AUDIT_FILE, 'utf8')); } catch {}
+  log.unshift({ ts: new Date().toISOString(), action, ...details });
+  if (log.length > MAX_AUDIT) log.length = MAX_AUDIT;
+  fs.writeFileSync(AUDIT_FILE, JSON.stringify(log));
+}
+
 // ── BRUTE-FORCE RATE LIMITER ─────────────────────────
 // 5 wrong guesses → 15-minute lockout per draw slug.
 // In-memory only — resets on server restart (intentional for a World Cup bot).
@@ -97,9 +113,13 @@ function findDrawBySlug(slug) {
   return load('draws.json').find(d => d.slug === slug) || null;
 }
 
-async function verifyDrawPin(slug, pin) {
+async function verifyDrawPin(slug, pin, req) {
+  const ip = req ? getIp(req) : '?';
   const lockedMins = checkLocked(slug);
-  if (lockedMins) return { error: `Too many attempts — try again in ${lockedMins} min`, locked: true };
+  if (lockedMins) {
+    audit('draw_locked', { slug, ip });
+    return { error: `Too many attempts — try again in ${lockedMins} min`, locked: true };
+  }
 
   const draw = findDrawBySlug(slug);
   if (!draw?.pinHash) return { error: 'Draw not found' };
@@ -107,10 +127,12 @@ async function verifyDrawPin(slug, pin) {
   const hash = await hashPin(String(pin), draw.pinSalt);
   if (hash !== draw.pinHash) {
     recordFail(slug);
+    audit('draw_login_fail', { slug, ip });
     return { error: 'Incorrect PIN' };
   }
 
   recordSuccess(slug);
+  audit('draw_login_success', { slug, draw: draw.name, ip });
   return { draw };
 }
 
@@ -137,6 +159,7 @@ const ROUTES = {
   'POST /api/admin/login':         handleAdminLogin,
   'POST /api/admin/logout':        handleAdminLogout,
   'POST /api/admin/draws/delete':  handleAdminDeleteDraw,
+  'GET /api/admin/audit':          adminOnly((_,r) => { let log=[]; try{log=JSON.parse(fs.readFileSync(AUDIT_FILE,'utf8'));}catch{} json(r,log); }),
 
   // ── Public reads (fixture/team data — no secrets) ──
   'GET /api/teams':        (_,r) => json(r, load('teams.json')),
@@ -218,8 +241,12 @@ function checkAdminSession(req) {
 }
 
 async function handleAdminLogin(req, res) {
+  const ip = getIp(req);
   const lockedMins = checkLocked('admin');
-  if (lockedMins) return json(res, { ok: false, error: `Too many attempts — try again in ${lockedMins} min` });
+  if (lockedMins) {
+    audit('admin_locked', { ip });
+    return json(res, { ok: false, error: `Too many attempts — try again in ${lockedMins} min` });
+  }
 
   const { password } = await parseBody(req);
   let cfg;
@@ -228,9 +255,11 @@ async function handleAdminLogin(req, res) {
   const hash = await hashPin(String(password || ''), cfg.passwordSalt);
   if (hash !== cfg.passwordHash) {
     recordFail('admin');
+    audit('admin_login_fail', { ip });
     return json(res, { ok: false, error: 'Incorrect password' });
   }
   recordSuccess('admin');
+  audit('admin_login_success', { ip });
   return json(res, { ok: true, token: createAdminSession() });
 }
 
@@ -245,6 +274,7 @@ async function handleAdminDeleteDraw(req, res) {
   if (!slug) return json(res, { error: 'slug required' }, 400);
   const draws = load('draws.json').filter(d => d.slug !== slug && d.id !== slug);
   save('draws.json', draws);
+  audit('draw_deleted', { slug, ip: getIp(req) });
   json(res, { ok: true });
 }
 
@@ -254,7 +284,7 @@ async function handleDrawLogin(req, res) {
   const { name, pin } = await parseBody(req);
   if (!name?.trim()) return json(res, { error: 'Enter your draw name' }, 400);
   const slug = slugify(name.trim());
-  const result = await verifyDrawPin(slug, pin);
+  const result = await verifyDrawPin(slug, pin, req);
   if (result.error) return json(res, { ok: false, error: result.error, locked: result.locked });
   return json(res, { ok: true, slug });
 }
@@ -286,6 +316,7 @@ async function handleSetupCreate(req, res) {
     users:       []
   });
   save('draws.json', draws);
+  audit('draw_created', { slug, draw: name.trim(), ip: getIp(req) });
   json(res, { slug, manageUrl: `/manage/${slug}` });
 }
 
@@ -301,12 +332,12 @@ async function handleManageApi(req, res, urlPath) {
   if (action === 'verify') {
     const lockedMins = checkLocked(slug);
     if (lockedMins) return json(res, { ok: false, error: `Too many attempts — try again in ${lockedMins} min` });
-    const result = await verifyDrawPin(slug, body.pin);
+    const result = await verifyDrawPin(slug, body.pin, req);
     if (result.error) return json(res, { ok: false, error: result.error });
     return json(res, { ok: true, name: result.draw.name });
   }
 
-  const result = await verifyDrawPin(slug, body.pin);
+  const result = await verifyDrawPin(slug, body.pin, req);
   if (result.error) return json(res, { error: result.error }, result.locked ? 429 : 401);
   const { draw } = result;
 
