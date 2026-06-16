@@ -110,10 +110,10 @@ function findDrawBySlug(slug) {
   return load('draws.json').find(d => d.slug === slug) || null;
 }
 
-async function verifyDrawPin(slug, pin) {
+async function verifyDrawPin(slug, pin, log = false) {
   const lockedMins = checkLocked(slug);
   if (lockedMins) {
-    audit('draw_locked', { slug });
+    if (log) audit('draw_locked', { slug });
     return { error: `Too many attempts — try again in ${lockedMins} min`, locked: true };
   }
 
@@ -123,12 +123,12 @@ async function verifyDrawPin(slug, pin) {
   const hash = await hashPin(String(pin), draw.pinSalt);
   if (hash !== draw.pinHash) {
     recordFail(slug);
-    audit('draw_login_fail', { slug, draw: draw.name });
+    if (log) audit('draw_login_fail', { slug, draw: draw.name });
     return { error: 'Incorrect PIN' };
   }
 
   recordSuccess(slug);
-  audit('draw_login_success', { slug, draw: draw.name });
+  if (log) audit('draw_login_success', { slug, draw: draw.name });
   return { draw };
 }
 
@@ -279,7 +279,7 @@ async function handleDrawLogin(req, res) {
   const { name, pin } = await parseBody(req);
   if (!name?.trim()) return json(res, { error: 'Enter your draw name' }, 400);
   const slug = slugify(name.trim());
-  const result = await verifyDrawPin(slug, pin);
+  const result = await verifyDrawPin(slug, pin, true);
   if (result.error) return json(res, { ok: false, error: result.error, locked: result.locked });
   return json(res, { ok: true, slug });
 }
@@ -327,12 +327,12 @@ async function handleManageApi(req, res, urlPath) {
   if (action === 'verify') {
     const lockedMins = checkLocked(slug);
     if (lockedMins) return json(res, { ok: false, error: `Too many attempts — try again in ${lockedMins} min` });
-    const result = await verifyDrawPin(slug, body.pin, req);
+    const result = await verifyDrawPin(slug, body.pin, true);
     if (result.error) return json(res, { ok: false, error: result.error });
     return json(res, { ok: true, name: result.draw.name });
   }
 
-  const result = await verifyDrawPin(slug, body.pin, req);
+  const result = await verifyDrawPin(slug, body.pin);
   if (result.error) return json(res, { error: result.error }, result.locked ? 429 : 401);
   const { draw } = result;
 
