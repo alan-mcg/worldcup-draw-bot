@@ -155,6 +155,7 @@ const ROUTES = {
 
   // ── Auth ────────────────────────────────────────────
   'POST /api/draw-login':          handleDrawLogin,
+  'POST /api/draw-accessed':       async (req,r) => { const b=await parseBody(req); if(b.slug&&b.draw) audit('draw_login_success',{slug:b.slug,draw:b.draw}); json(r,{ok:true}); },
   'POST /api/admin/login':         handleAdminLogin,
   'POST /api/admin/logout':        handleAdminLogout,
   'POST /api/admin/draws/delete':  handleAdminDeleteDraw,
@@ -330,7 +331,7 @@ async function handleManageApi(req, res, urlPath) {
   if (action === 'verify') {
     const lockedMins = checkLocked(slug);
     if (lockedMins) return json(res, { ok: false, error: `Too many attempts — try again in ${lockedMins} min` });
-    const result = await verifyDrawPin(slug, body.pin, true);
+    const result = await verifyDrawPin(slug, body.pin);
     if (result.error) return json(res, { ok: false, error: result.error });
     return json(res, { ok: true, name: result.draw.name });
   }

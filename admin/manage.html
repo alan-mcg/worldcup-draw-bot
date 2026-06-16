@@ -629,8 +629,10 @@ async function submitPin() {
   const val = document.getElementById('pin-input').value;
   document.getElementById('gate-err').textContent = '';
   if (!/^\d{6}$/.test(val)) { document.getElementById('gate-err').textContent = 'Enter your 6-digit PIN'; return; }
-  if (await enter(val)) { pin = val; sessionStorage.setItem(PINKEY, pin); }
-  else document.getElementById('gate-err').textContent = 'Incorrect PIN';
+  if (await enter(val)) {
+    pin = val; sessionStorage.setItem(PINKEY, pin);
+    fetch('/api/draw-accessed', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug,draw:draw?.name||slug})});
+  } else document.getElementById('gate-err').textContent = 'Incorrect PIN';
 }
 
 async function enter(tryPin) {
