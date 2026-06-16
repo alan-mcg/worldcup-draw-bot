@@ -479,6 +479,7 @@ input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,
       <h1 id="app-title">Draw</h1>
       <div class="meta" id="app-meta"></div>
     </div>
+    <button class="switch-btn" id="pwa-btn" onclick="pwaInstall()" style="display:none">📲 Add to Home Screen</button>
     <button class="switch-btn" onclick="switchDraw()">⇄ Switch Draw</button>
   </div>
 
@@ -1292,54 +1293,31 @@ async function refreshMatches() {
 
 setInterval(refreshMatches, 60000);
 
-// ── PWA INSTALL PROMPT ───────────────────────────────
-(function() {
-  if (window.matchMedia('(display-mode: standalone)').matches) return; // already installed
+// ── PWA INSTALL ──────────────────────────────────────
+let _pwaPrompt = null;
+const _isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+const _isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
-  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const isAndroidOrDesktop = !isIos;
-
-  let deferredPrompt = null;
-
-  const banner = document.getElementById('pwa-banner');
-  const iosMsg  = document.getElementById('pwa-ios');
-  const installBtn = document.getElementById('pwa-install-btn');
-
+if (!_isStandalone) {
+  if (_isIos) {
+    document.getElementById('pwa-btn').style.display = '';
+  }
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
-    deferredPrompt = e;
-    banner.style.display = 'flex';
+    _pwaPrompt = e;
+    document.getElementById('pwa-btn').style.display = '';
   });
+}
 
-  if (isIos) {
-    banner.style.display = 'flex';
-    installBtn.style.display = 'none';
-    iosMsg.style.display = 'block';
+function pwaInstall() {
+  if (_pwaPrompt) {
+    _pwaPrompt.prompt();
+    _pwaPrompt.userChoice.then(() => { _pwaPrompt = null; document.getElementById('pwa-btn').style.display = 'none'; });
+  } else {
+    alert('To add to your home screen:\n\n1. Tap the Share button (box with arrow)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add"');
   }
-
-  installBtn && installBtn.addEventListener('click', async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    deferredPrompt = null;
-    if (outcome === 'accepted') banner.style.display = 'none';
-  });
-
-  document.getElementById('pwa-dismiss') && document.getElementById('pwa-dismiss').addEventListener('click', () => {
-    banner.style.display = 'none';
-  });
-})();
+}
 </script>
 
-<!-- PWA install banner -->
-<div id="pwa-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#fff;border-top:1.5px solid #e2e8f0;padding:.875rem 1rem;align-items:center;gap:.75rem;box-shadow:0 -4px 16px rgba(0,0,0,.08)">
-  <span style="font-size:1.6rem;line-height:1">⚽</span>
-  <div style="flex:1;min-width:0">
-    <div style="font-weight:700;font-size:.88rem;color:#0f172a">Add SweepWC to your home screen</div>
-    <div id="pwa-ios" style="display:none;font-size:.78rem;color:#64748b;margin-top:.15rem">Tap <strong>Share</strong> then <strong>"Add to Home Screen"</strong></div>
-  </div>
-  <button id="pwa-install-btn" style="background:#16a34a;color:#fff;border:none;border-radius:8px;padding:.45rem .9rem;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap">Add</button>
-  <button id="pwa-dismiss" style="background:none;border:none;font-size:1.2rem;color:#94a3b8;cursor:pointer;padding:.2rem .4rem;line-height:1">&times;</button>
-</div>
 </body>
 </html>
