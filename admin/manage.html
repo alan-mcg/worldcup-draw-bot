@@ -796,8 +796,10 @@ function renderOverview() {
     }
 
     // Regular fixture row
-    const hName    = h ? `${h.flag} ${h.name}` : m.homeTeam;
-    const aName    = a ? `${a.flag} ${a.name}` : m.awayTeam;
+    const hBase  = h ? `${h.flag} ${h.name}` : m.homeTeam;
+    const aBase  = a ? `${a.flag} ${a.name}` : m.awayTeam;
+    const hName  = hOwn?.length ? `<strong>${hBase}</strong> <span style="color:var(--muted);font-size:.82rem">(${hOwn.join(' & ')})</span>` : hBase;
+    const aName  = aOwn?.length ? `<strong>${aBase}</strong> <span style="color:var(--muted);font-size:.82rem">(${aOwn.join(' & ')})</span>` : aBase;
     const scoreHTML = m.played
       ? `<span class="fixture-score">${m.homeScore}–${m.awayScore}</span>`
       : `<span class="fixture-score upcoming">${localKickoff(m)}</span>`;
