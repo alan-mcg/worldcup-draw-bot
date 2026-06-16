@@ -341,7 +341,7 @@ input:focus,select:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px
   <div class="card">
     <h2>Recent Activity</h2>
     <table>
-      <thead><tr><th>Time</th><th>Event</th><th>Draw</th><th>IP</th></tr></thead>
+      <thead><tr><th>Time</th><th>Event</th><th>Draw</th></tr></thead>
       <tbody id="audit-tbody"><tr><td colspan="4" style="color:var(--muted);text-align:center">Loading…</td></tr></tbody>
     </table>
   </div>
@@ -917,7 +917,7 @@ const ACTION_LABELS = {
 async function loadAudit() {
   const log = await api('GET', '/api/admin/audit');
   const tbody = document.getElementById('audit-tbody');
-  if (!log?.length) { tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);text-align:center">No activity yet</td></tr>'; return; }
+  if (!log?.length) { tbody.innerHTML = '<tr><td colspan="3" style="color:var(--muted);text-align:center">No activity yet</td></tr>'; return; }
   tbody.innerHTML = log.map(e => {
     const { label, style } = ACTION_LABELS[e.action] || { label: e.action, style: '' };
     const time = new Date(e.ts).toLocaleString('en-IE', { dateStyle: 'short', timeStyle: 'short' });
@@ -925,7 +925,6 @@ async function loadAudit() {
       <td style="white-space:nowrap;color:var(--muted);font-size:.8rem">${time}</td>
       <td style="${style};font-weight:500">${label}</td>
       <td style="font-size:.85rem">${e.draw || e.slug || '—'}</td>
-      <td style="font-size:.8rem;color:var(--muted);font-family:monospace">${e.ip || '—'}</td>
     </tr>`;
   }).join('');
 }

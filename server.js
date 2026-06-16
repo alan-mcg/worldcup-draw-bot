@@ -61,9 +61,6 @@ function hashPin(pin, salt) {
 const AUDIT_FILE = path.join(DATA_DIR, 'audit.json');
 const MAX_AUDIT  = 500;
 
-function getIp(req) {
-  return req.headers['x-real-ip'] || req.socket.remoteAddress || '?';
-}
 
 function audit(action, details = {}) {
   let log = [];
@@ -113,11 +110,10 @@ function findDrawBySlug(slug) {
   return load('draws.json').find(d => d.slug === slug) || null;
 }
 
-async function verifyDrawPin(slug, pin, req) {
-  const ip = req ? getIp(req) : '?';
+async function verifyDrawPin(slug, pin) {
   const lockedMins = checkLocked(slug);
   if (lockedMins) {
-    audit('draw_locked', { slug, ip });
+    audit('draw_locked', { slug });
     return { error: `Too many attempts — try again in ${lockedMins} min`, locked: true };
   }
 
@@ -127,12 +123,12 @@ async function verifyDrawPin(slug, pin, req) {
   const hash = await hashPin(String(pin), draw.pinSalt);
   if (hash !== draw.pinHash) {
     recordFail(slug);
-    audit('draw_login_fail', { slug, ip });
+    audit('draw_login_fail', { slug, draw: draw.name });
     return { error: 'Incorrect PIN' };
   }
 
   recordSuccess(slug);
-  audit('draw_login_success', { slug, draw: draw.name, ip });
+  audit('draw_login_success', { slug, draw: draw.name });
   return { draw };
 }
 
@@ -241,10 +237,9 @@ function checkAdminSession(req) {
 }
 
 async function handleAdminLogin(req, res) {
-  const ip = getIp(req);
   const lockedMins = checkLocked('admin');
   if (lockedMins) {
-    audit('admin_locked', { ip });
+    audit('admin_locked', {});
     return json(res, { ok: false, error: `Too many attempts — try again in ${lockedMins} min` });
   }
 
@@ -255,11 +250,11 @@ async function handleAdminLogin(req, res) {
   const hash = await hashPin(String(password || ''), cfg.passwordSalt);
   if (hash !== cfg.passwordHash) {
     recordFail('admin');
-    audit('admin_login_fail', { ip });
+    audit('admin_login_fail', {});
     return json(res, { ok: false, error: 'Incorrect password' });
   }
   recordSuccess('admin');
-  audit('admin_login_success', { ip });
+  audit('admin_login_success', {});
   return json(res, { ok: true, token: createAdminSession() });
 }
 
@@ -274,7 +269,7 @@ async function handleAdminDeleteDraw(req, res) {
   if (!slug) return json(res, { error: 'slug required' }, 400);
   const draws = load('draws.json').filter(d => d.slug !== slug && d.id !== slug);
   save('draws.json', draws);
-  audit('draw_deleted', { slug, ip: getIp(req) });
+  audit('draw_deleted', { slug });
   json(res, { ok: true });
 }
 
@@ -284,7 +279,7 @@ async function handleDrawLogin(req, res) {
   const { name, pin } = await parseBody(req);
   if (!name?.trim()) return json(res, { error: 'Enter your draw name' }, 400);
   const slug = slugify(name.trim());
-  const result = await verifyDrawPin(slug, pin, req);
+  const result = await verifyDrawPin(slug, pin);
   if (result.error) return json(res, { ok: false, error: result.error, locked: result.locked });
   return json(res, { ok: true, slug });
 }
@@ -316,7 +311,7 @@ async function handleSetupCreate(req, res) {
     users:       []
   });
   save('draws.json', draws);
-  audit('draw_created', { slug, draw: name.trim(), ip: getIp(req) });
+  audit('draw_created', { slug, draw: name.trim() });
   json(res, { slug, manageUrl: `/manage/${slug}` });
 }
 
