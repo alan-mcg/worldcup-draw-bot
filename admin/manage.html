@@ -1294,6 +1294,7 @@ async function refreshMatches() {
 setInterval(refreshMatches, 60000);
 
 // ── PWA INSTALL ──────────────────────────────────────
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 let _pwaPrompt = null;
 const _isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
 const _isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;

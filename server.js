@@ -37,6 +37,8 @@ const ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
 <text x="50" y="68" font-size="55" text-anchor="middle" font-family="serif">⚽</text>
 </svg>`;
 
+const SW_JS = `self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));`;
+
 // ── PIN SECURITY ─────────────────────────────────────
 // PBKDF2 with 200,000 iterations — each hash takes ~200ms.
 // Brute-forcing all 1,000,000 six-digit PINs would take ~55 hours.
@@ -128,6 +130,7 @@ const ROUTES = {
   'GET /admin':          (q,r) => serveHtml(r, 'dashboard.html'),
   'GET /manifest.json':  (_,r) => { r.writeHead(200,{'Content-Type':'application/manifest+json'}); r.end(MANIFEST); },
   'GET /icon.svg':       (_,r) => { r.writeHead(200,{'Content-Type':'image/svg+xml'}); r.end(ICON_SVG); },
+  'GET /sw.js':          (_,r) => { r.writeHead(200,{'Content-Type':'application/javascript'}); r.end(SW_JS); },
 
   // ── Auth ────────────────────────────────────────────
   'POST /api/draw-login':          handleDrawLogin,
