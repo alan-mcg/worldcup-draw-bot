@@ -479,7 +479,7 @@ input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,
       <h1 id="app-title">Draw</h1>
       <div class="meta" id="app-meta"></div>
     </div>
-    <button class="switch-btn" id="pwa-btn" onclick="pwaInstall()" style="display:none">📲 Add to Home Screen</button>
+    <button class="switch-btn" id="pwa-btn" onclick="pwaInstall()">📲 Add to Home Screen</button>
     <button class="switch-btn" onclick="switchDraw()">⇄ Switch Draw</button>
   </div>
 
@@ -1296,26 +1296,26 @@ setInterval(refreshMatches, 60000);
 // ── PWA INSTALL ──────────────────────────────────────
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 let _pwaPrompt = null;
-const _isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
 const _isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
-if (!_isStandalone) {
-  if (_isIos) {
-    document.getElementById('pwa-btn').style.display = '';
-  }
-  window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault();
-    _pwaPrompt = e;
-    document.getElementById('pwa-btn').style.display = '';
-  });
+if (_isStandalone) {
+  document.getElementById('pwa-btn').style.display = 'none';
 }
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _pwaPrompt = e;
+});
 
 function pwaInstall() {
   if (_pwaPrompt) {
     _pwaPrompt.prompt();
-    _pwaPrompt.userChoice.then(() => { _pwaPrompt = null; document.getElementById('pwa-btn').style.display = 'none'; });
+    _pwaPrompt.userChoice.then(({ outcome }) => {
+      _pwaPrompt = null;
+      if (outcome === 'accepted') document.getElementById('pwa-btn').style.display = 'none';
+    });
   } else {
-    alert('To add to your home screen:\n\n1. Tap the Share button (box with arrow)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add"');
+    toast('Open in Chrome, then tap the menu (⋮) → "Add to Home Screen"');
   }
 }
 </script>
