@@ -586,6 +586,11 @@ input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(22,163,
 <script>
 const slug    = location.pathname.replace(/^\/manage\//, '').replace(/\/$/, '');
 const PINKEY  = 'wc_pin_' + slug;
+
+function localKickoff(m) {
+  if (m.kickoffUTC) return new Date(m.kickoffUTC).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  return m.kickoff || 'TBC';
+}
 const isSetup = new URLSearchParams(location.search).has('setup');
 let   pin     = sessionStorage.getItem(PINKEY);
 let   draw    = null;
@@ -778,7 +783,7 @@ function renderOverview() {
       const aLabel = `<strong>${aOwn.join(' & ')}</strong> <span style="color:var(--muted);font-size:.82rem">(${a ? a.flag+' '+a.name : m.awayTeam})</span>`;
       const scoreHTML = m.played
         ? `<span class="fixture-score">${m.homeScore}–${m.awayScore}</span>`
-        : `<span class="fixture-score upcoming">${m.kickoff||'TBC'}</span>`;
+        : `<span class="fixture-score upcoming">${localKickoff(m)}</span>`;
       return `<div class="fixture-item fixture-item--clash">
         <div class="fixture-teams">
           <span style="margin-right:.2rem">⚔️</span>
@@ -795,7 +800,7 @@ function renderOverview() {
     const aName    = a ? `${a.flag} ${a.name}` : m.awayTeam;
     const scoreHTML = m.played
       ? `<span class="fixture-score">${m.homeScore}–${m.awayScore}</span>`
-      : `<span class="fixture-score upcoming">${m.kickoff||'TBC'}</span>`;
+      : `<span class="fixture-score upcoming">${localKickoff(m)}</span>`;
     return `<div class="fixture-item">
       <div class="fixture-teams">${hName} <small style="color:var(--muted);margin:0 .3rem">vs</small> ${aName}</div>
       ${scoreHTML}
