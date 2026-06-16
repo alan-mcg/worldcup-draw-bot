@@ -414,11 +414,5 @@ server.listen(3000, () => {
   console.log('\n🌍 World Cup Bot     → http://localhost:3000');
   console.log('   🆕 New draw setup  → http://localhost:3000/setup\n');
 
-  const config = load('config.json');
-  if (!config.last_synced) {
-    console.log('   First run — fetching all fixtures...');
-    syncAllFixtures().catch(e => console.error('Initial sync error:', e.message));
-  } else {
-    syncToday().catch(e => console.error('Startup sync error:', e.message));
-  }
+  syncAllFixtures().catch(e => console.error('Startup sync error:', e.message));
 });

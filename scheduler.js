@@ -6,7 +6,7 @@ const path = require('path');
 const fs   = require('fs');
 const { execSync } = require('child_process');
 
-const SYNC_SCHEDULE = '0 */2 * * *'; // Sync scores every 2 hours during tournament
+const SYNC_SCHEDULE = '*/30 * * * *'; // Sync all fixtures every 30 minutes
 
 // Read send_time from config.json so there's one place to change it
 function getSendSchedule() {
@@ -23,12 +23,12 @@ const sendSchedule = getSendSchedule();
 
 console.log('⏰ World Cup Bot Scheduler started');
 console.log(`   📤 Sends daily at ${JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'config.json'), 'utf8')).send_time || '09:00'}`);
-console.log('   🔄 Syncs scores every 2 hours');
+console.log('   🔄 Syncs all fixtures every 30 minutes');
 console.log('   Use Ctrl+C to stop, or pm2 to run in background\n');
 
 cron.schedule(SYNC_SCHEDULE, () => {
-  console.log(`\n🔄 [${new Date().toLocaleString()}] Syncing today's fixtures...`);
-  try { execSync('node -e "require(\'./api_sync\').syncToday()"', { stdio: 'inherit' }); }
+  console.log(`\n🔄 [${new Date().toLocaleString()}] Syncing all fixtures...`);
+  try { execSync('node -e "require(\'./api_sync\').syncAllFixtures()"', { stdio: 'inherit' }); }
   catch (e) { console.error('Sync error:', e.message); }
 });
 
