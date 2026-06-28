@@ -83,20 +83,18 @@ async function syncAllFixtures() {
   let existing = [];
   try { existing = loadJSON('matches.json'); } catch {}
 
-  const existingById = Object.fromEntries(
-    existing.filter(m => m.sourceId).map(m => [m.sourceId, m])
-  );
+  // Never drop existing played matches with valid scores — even if the API stops returning them
+  const preserved = existing.filter(m => m.played && m.homeScore !== null && m.awayScore !== null);
+  const preservedIds = new Set(preserved.map(m => m.sourceId).filter(Boolean));
 
-  // Preserve scores only if already stored with real (non-null) scores; otherwise refresh from API
-  const merged = fetched.map(m => {
-    const ex = existingById[m.sourceId];
-    return (ex && ex.played && ex.homeScore !== null && ex.awayScore !== null) ? ex : m;
-  });
+  // Use fresh API data for anything not already locked in
+  const updated = fetched.filter(m => !preservedIds.has(m.sourceId));
+  const merged = [...preserved, ...updated];
 
-  // Keep any manually-entered matches that don't overlap a synced fixture
-  const fetchedKeys = new Set(fetched.map(m => m.date + '|' + m.homeTeam + '|' + m.awayTeam));
+  // Keep manually-entered matches not covered by either set
+  const mergedKeys = new Set(merged.map(m => m.date + '|' + m.homeTeam + '|' + m.awayTeam));
   existing
-    .filter(m => !m.sourceId && !fetchedKeys.has(m.date + '|' + m.homeTeam + '|' + m.awayTeam))
+    .filter(m => !m.sourceId && !mergedKeys.has(m.date + '|' + m.homeTeam + '|' + m.awayTeam))
     .forEach(m => merged.push(m));
 
   saveJSON('matches.json', merged);
