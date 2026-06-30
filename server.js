@@ -17,7 +17,7 @@ const parseBody = req => new Promise((res, rej) => {
   req.on('error', rej);
 });
 const serveHtml = (res, file) => {
-  res.writeHead(200, {'Content-Type': 'text/html'});
+  res.writeHead(200, {'Content-Type': 'text/html', 'Cache-Control': 'no-cache'});
   res.end(fs.readFileSync(path.join(__dirname, 'admin', file), 'utf8'));
 };
 
