@@ -545,6 +545,53 @@ async function loadOverview() {
 }
 
 // ── DRAW PAGE ──────────────────────────────────────
+function eliminatedTeams() {
+  const knockoutStages = new Set(['round_of_32','round_of_16','quarter_final','semi_final','third_place','final']);
+  const isKnockout = m => knockoutStages.has(m.stage) || (m.stage === 'group' && !m.group);
+  const stillAlive = new Set();
+  for (const m of allMatches) {
+    if (!m.played && isKnockout(m)) {
+      if (m.homeTeam) stillAlive.add(m.homeTeam);
+      if (m.awayTeam) stillAlive.add(m.awayTeam);
+    }
+  }
+  const knocked = new Set();
+  for (const m of allMatches) {
+    if (!m.played || m.homeScore === null || m.awayScore === null) continue;
+    if (!isKnockout(m)) continue;
+    if (m.homeScore < m.awayScore && !stillAlive.has(m.homeTeam)) knocked.add(m.homeTeam);
+    if (m.awayScore < m.homeScore && !stillAlive.has(m.awayTeam)) knocked.add(m.awayTeam);
+  }
+  const groupMap = {};
+  for (const m of allMatches) {
+    if (m.stage !== 'group' || !m.group) continue;
+    if (!groupMap[m.group]) groupMap[m.group] = { matches: [], teams: new Set() };
+    groupMap[m.group].matches.push(m);
+    groupMap[m.group].teams.add(m.homeTeam);
+    groupMap[m.group].teams.add(m.awayTeam);
+  }
+  for (const { matches: gm, teams: teamSet } of Object.values(groupMap)) {
+    const teams = [...teamSet];
+    const n = teams.length;
+    const expected = n * (n - 1) / 2;
+    const played = gm.filter(m => m.played && m.homeScore !== null && m.awayScore !== null);
+    if (played.length < expected) continue;
+    const pts = {}, gd = {}, gf = {};
+    for (const t of teams) { pts[t] = 0; gd[t] = 0; gf[t] = 0; }
+    for (const m of played) {
+      const hs = m.homeScore, as = m.awayScore;
+      gf[m.homeTeam] += hs; gf[m.awayTeam] += as;
+      gd[m.homeTeam] += hs - as; gd[m.awayTeam] += as - hs;
+      if (hs > as) { pts[m.homeTeam] += 3; }
+      else if (hs < as) { pts[m.awayTeam] += 3; }
+      else { pts[m.homeTeam] += 1; pts[m.awayTeam] += 1; }
+    }
+    const ranked = [...teams].sort((a, b) => (pts[b]-pts[a]) || (gd[b]-gd[a]) || (gf[b]-gf[a]));
+    for (const t of ranked.slice(2)) { if (!stillAlive.has(t)) knocked.add(t); }
+  }
+  return knocked;
+}
+
 function buildLeaderboardLocal(draw) {
   const { calcDrawStandings } = window; // fallback — uses server API
   const tm = Object.fromEntries(allTeams.map(t=>[t.id,t]));
@@ -585,6 +632,7 @@ async function renderDrawPage() {
   for(const m of todayMatches){if(m.played)continue;const ho=teamOwners[m.homeTeam],ao=teamOwners[m.awayTeam];if(ho?.length&&ao?.length){const h=tm[m.homeTeam],a=tm[m.awayTeam];if(h&&a)rivalries.push({h,ho,a,ao,t:m.kickoff});}}
 
   const medals=['🥇','🥈','🥉'];
+  const eliminated = eliminatedTeams();
 
   $('draw-content').innerHTML = `
     <div class="draw-header">
@@ -605,7 +653,7 @@ async function renderDrawPage() {
         ${lb.map((row,i)=>{
           const rc=i===0?'rk1':i===1?'rk2':i===2?'rk3':'rkn';
           const medal=medals[i]||'';
-          const teamPills=(row.teams||[]).map(t=>`<span class="badge bg-green">${t.team.flag} ${t.team.name} · ${t.points}pts</span>`).join(' ');
+          const teamPills=(row.teams||[]).map(t=>{const out=eliminated.has(t.team.id);const s=out?'opacity:.45;text-decoration:line-through;':'';return `<span class="badge bg-green" style="${s}">${t.team.flag} ${t.team.name} · ${t.points}pts</span>`;}).join(' ');
           return `<tr>
             <td><span class="rank-badge ${rc}">${medal||(i+1)}</span></td>
             <td><strong>${row.name}</strong></td>
