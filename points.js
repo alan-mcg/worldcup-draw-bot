@@ -41,15 +41,17 @@ function calcDrawStandings(draw) {
 
   const standings = (draw.users || []).map(user => {
     let grandTotal = 0;
+    let goalsScored = 0;
     const teamBreakdown = (user.teams || []).map(teamId => {
       const team = teamsMap[teamId];
       if (!team) return null;
       const { total, results } = calcTeamPoints(teamId, matches, pointsConfig);
       grandTotal += total;
+      goalsScored += results.reduce((s, r) => s + (r.teamScore || 0), 0);
       return { team, points: total, results };
     }).filter(Boolean);
-    return { user, teamBreakdown, grandTotal };
-  }).sort((a, b) => b.grandTotal - a.grandTotal);
+    return { user, teamBreakdown, grandTotal, goalsScored };
+  }).sort((a, b) => b.grandTotal - a.grandTotal || b.goalsScored - a.goalsScored);
 
   return standings;
 }
@@ -59,9 +61,9 @@ function buildLeaderboard(draw) {
     rank: i + 1,
     id: s.user.id,
     name: s.user.name,
-    phone: s.user.phone,
     teams: s.teamBreakdown.map(t => `${t.team.flag} ${t.team.name} (${t.points}pts)`).join(', '),
-    total: s.grandTotal
+    total: s.grandTotal,
+    goalsScored: s.goalsScored
   }));
 }
 

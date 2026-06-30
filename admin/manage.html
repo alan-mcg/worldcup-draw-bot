@@ -714,23 +714,25 @@ function buildLeaderboard() {
   const tmap = Object.fromEntries(teams.map(t => [t.id, t]));
   return (draw.users || []).map(user => {
     let total = 0;
+    let goalsScored = 0;
     const userTeams = (user.teams || []).map(tid => {
       const team = tmap[tid]; if (!team) return null;
       let pts = 0;
       for (const m of matches) {
-        if (!m.played) continue;
+        if (!m.played || m.homeScore === null || m.awayScore === null) continue;
         const isH = m.homeTeam === tid, isA = m.awayTeam === tid;
         if (!isH && !isA) continue;
         const ts  = isH ? m.homeScore : m.awayScore;
         const os  = isH ? m.awayScore : m.homeScore;
         const res = ts > os ? 'win' : ts < os ? 'loss' : 'draw';
         pts += (POINTS[m.stage] || {})[res] || 0;
+        goalsScored += ts;
       }
       total += pts;
       return { team, points: pts };
     }).filter(Boolean);
-    return { name: user.name, teams: userTeams, total };
-  }).sort((a, b) => b.total - a.total);
+    return { name: user.name, teams: userTeams, total, goalsScored };
+  }).sort((a, b) => b.total - a.total || b.goalsScored - a.goalsScored);
 }
 
 function renderOverview() {
@@ -759,11 +761,13 @@ function renderOverview() {
           const pills = (row.teams||[]).map(t =>
             `<span class="team-pill">${t.team.flag} ${t.team.name}${t.points?` · ${t.points}pts`:''}</span>`
           ).join('');
+          const tied = lb.some((r, j) => j !== i && r.total === row.total);
+          const goalsSub = tied ? `<br><span style="font-size:.72rem;color:var(--muted);font-weight:400">${row.goalsScored} goals</span>` : '';
           return `<tr>
             <td><span class="rank-badge ${rc}">${medals[i]||(i+1)}</span></td>
             <td><strong>${esc(row.name)}</strong></td>
             <td style="line-height:2">${pills||'<span style="color:var(--muted);font-style:italic;font-size:.8rem">No teams</span>'}</td>
-            <td><span class="pts-big">${row.total}</span></td>
+            <td><span class="pts-big">${row.total}</span>${goalsSub}</td>
           </tr>`;
         }).join('')}</tbody>
       </table>`;
