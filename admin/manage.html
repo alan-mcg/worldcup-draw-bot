@@ -712,22 +712,64 @@ const POINTS = {
 
 function eliminatedTeams() {
   const knockoutStages = new Set(['round_of_32','round_of_16','quarter_final','semi_final','third_place','final']);
-  // Teams with a future unplayed knockout match are still alive
+
+  // Teams appearing in a future unplayed knockout match are still alive
   const stillAlive = new Set();
   for (const m of matches) {
     if (!m.played && knockoutStages.has(m.stage)) {
-      stillAlive.add(m.homeTeam);
-      stillAlive.add(m.awayTeam);
+      if (m.homeTeam) stillAlive.add(m.homeTeam);
+      if (m.awayTeam) stillAlive.add(m.awayTeam);
     }
   }
-  // Teams that lost a knockout match and have no future knockout match are out
+
   const knocked = new Set();
+
+  // Knockout eliminations: lost a knockout match with no future fixture
   for (const m of matches) {
     if (!m.played || m.homeScore === null || m.awayScore === null) continue;
     if (!knockoutStages.has(m.stage)) continue;
     if (m.homeScore < m.awayScore && !stillAlive.has(m.homeTeam)) knocked.add(m.homeTeam);
     if (m.awayScore < m.homeScore && !stillAlive.has(m.awayTeam)) knocked.add(m.awayTeam);
   }
+
+  // Group stage eliminations: bottom team(s) in each fully-played group
+  const groupMap = {};
+  for (const m of matches) {
+    if (m.stage !== 'group' || !m.group) continue;
+    if (!groupMap[m.group]) groupMap[m.group] = { matches: [], teams: new Set() };
+    groupMap[m.group].matches.push(m);
+    groupMap[m.group].teams.add(m.homeTeam);
+    groupMap[m.group].teams.add(m.awayTeam);
+  }
+
+  for (const { matches: gm, teams: teamSet } of Object.values(groupMap)) {
+    const teams = [...teamSet];
+    const n = teams.length;
+    const expected = n * (n - 1) / 2;
+    const played = gm.filter(m => m.played && m.homeScore !== null && m.awayScore !== null);
+    if (played.length < expected) continue; // group not finished
+
+    const pts = {}, gd = {}, gf = {};
+    for (const t of teams) { pts[t] = 0; gd[t] = 0; gf[t] = 0; }
+    for (const m of played) {
+      const hs = m.homeScore, as = m.awayScore;
+      gf[m.homeTeam] += hs; gf[m.awayTeam] += as;
+      gd[m.homeTeam] += hs - as; gd[m.awayTeam] += as - hs;
+      if (hs > as)      { pts[m.homeTeam] += 3; }
+      else if (hs < as) { pts[m.awayTeam] += 3; }
+      else              { pts[m.homeTeam] += 1; pts[m.awayTeam] += 1; }
+    }
+
+    const ranked = [...teams].sort((a, b) =>
+      (pts[b] - pts[a]) || (gd[b] - gd[a]) || (gf[b] - gf[a])
+    );
+
+    // Top 2 advance; everyone below is out (standard for groups of 3 or 4)
+    for (const t of ranked.slice(2)) {
+      if (!stillAlive.has(t)) knocked.add(t);
+    }
+  }
+
   return knocked;
 }
 
