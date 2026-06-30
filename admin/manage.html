@@ -712,11 +712,13 @@ const POINTS = {
 
 function eliminatedTeams() {
   const knockoutStages = new Set(['round_of_32','round_of_16','quarter_final','semi_final','third_place','final']);
+  // The API labels the post-group knockout round as stage:'group' with no group name
+  const isKnockout = m => knockoutStages.has(m.stage) || (m.stage === 'group' && !m.group);
 
-  // Teams appearing in a future unplayed knockout match are still alive
+  // Teams in any future unplayed knockout-type match are still alive
   const stillAlive = new Set();
   for (const m of matches) {
-    if (!m.played && knockoutStages.has(m.stage)) {
+    if (!m.played && isKnockout(m)) {
       if (m.homeTeam) stillAlive.add(m.homeTeam);
       if (m.awayTeam) stillAlive.add(m.awayTeam);
     }
@@ -724,15 +726,15 @@ function eliminatedTeams() {
 
   const knocked = new Set();
 
-  // Knockout eliminations: lost a knockout match with no future fixture
+  // Knockout eliminations (named stages + inter-round matches)
   for (const m of matches) {
     if (!m.played || m.homeScore === null || m.awayScore === null) continue;
-    if (!knockoutStages.has(m.stage)) continue;
+    if (!isKnockout(m)) continue;
     if (m.homeScore < m.awayScore && !stillAlive.has(m.homeTeam)) knocked.add(m.homeTeam);
     if (m.awayScore < m.homeScore && !stillAlive.has(m.awayTeam)) knocked.add(m.awayTeam);
   }
 
-  // Group stage eliminations: bottom team(s) in each fully-played group
+  // Group stage eliminations: bottom team(s) in each fully-played named group
   const groupMap = {};
   for (const m of matches) {
     if (m.stage !== 'group' || !m.group) continue;
@@ -747,7 +749,7 @@ function eliminatedTeams() {
     const n = teams.length;
     const expected = n * (n - 1) / 2;
     const played = gm.filter(m => m.played && m.homeScore !== null && m.awayScore !== null);
-    if (played.length < expected) continue; // group not finished
+    if (played.length < expected) continue;
 
     const pts = {}, gd = {}, gf = {};
     for (const t of teams) { pts[t] = 0; gd[t] = 0; gf[t] = 0; }
@@ -764,7 +766,7 @@ function eliminatedTeams() {
       (pts[b] - pts[a]) || (gd[b] - gd[a]) || (gf[b] - gf[a])
     );
 
-    // Top 2 advance; everyone below is out (standard for groups of 3 or 4)
+    // Top 2 advance; anyone below is out unless they appear in a future inter-round match (wild card)
     for (const t of ranked.slice(2)) {
       if (!stillAlive.has(t)) knocked.add(t);
     }
