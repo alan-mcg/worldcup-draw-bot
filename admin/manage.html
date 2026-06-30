@@ -710,6 +710,27 @@ const POINTS = {
   final:         { win:3, draw:1, loss:0 }
 };
 
+function eliminatedTeams() {
+  const knockoutStages = new Set(['round_of_32','round_of_16','quarter_final','semi_final','third_place','final']);
+  // Teams with a future unplayed knockout match are still alive
+  const stillAlive = new Set();
+  for (const m of matches) {
+    if (!m.played && knockoutStages.has(m.stage)) {
+      stillAlive.add(m.homeTeam);
+      stillAlive.add(m.awayTeam);
+    }
+  }
+  // Teams that lost a knockout match and have no future knockout match are out
+  const knocked = new Set();
+  for (const m of matches) {
+    if (!m.played || m.homeScore === null || m.awayScore === null) continue;
+    if (!knockoutStages.has(m.stage)) continue;
+    if (m.homeScore < m.awayScore && !stillAlive.has(m.homeTeam)) knocked.add(m.homeTeam);
+    if (m.awayScore < m.homeScore && !stillAlive.has(m.awayTeam)) knocked.add(m.awayTeam);
+  }
+  return knocked;
+}
+
 function buildLeaderboard() {
   const tmap = Object.fromEntries(teams.map(t => [t.id, t]));
   return (draw.users || []).map(user => {
@@ -750,6 +771,7 @@ function renderOverview() {
 
   // Standings
   const medals = ['🥇','🥈','🥉'];
+  const eliminated = eliminatedTeams();
   if (!lb.length) {
     document.getElementById('ov-standings').innerHTML = '<div class="empty">No participants yet</div>';
   } else {
@@ -758,9 +780,11 @@ function renderOverview() {
         <thead><tr><th>#</th><th>Participant</th><th>Teams</th><th>Pts</th></tr></thead>
         <tbody>${lb.map((row, i) => {
           const rc = i===0?'rk1':i===1?'rk2':i===2?'rk3':'rkn';
-          const pills = (row.teams||[]).map(t =>
-            `<span class="team-pill">${t.team.flag} ${t.team.name}${t.points?` · ${t.points}pts`:''}</span>`
-          ).join('');
+          const pills = (row.teams||[]).map(t => {
+            const out = eliminated.has(t.team.id);
+            const style = out ? 'opacity:.45;text-decoration:line-through;' : '';
+            return `<span class="team-pill" style="${style}">${t.team.flag} ${t.team.name}${t.points?` · ${t.points}pts`:''}</span>`;
+          }).join('');
           const tied = lb.some((r, j) => j !== i && r.total === row.total);
           const goalsSub = tied ? `<br><span style="font-size:.72rem;color:var(--muted);font-weight:400">${row.goalsScored} goals</span>` : '';
           return `<tr>
