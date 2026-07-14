@@ -596,7 +596,7 @@ function buildLeaderboardLocal(draw) {
   const { calcDrawStandings } = window; // fallback — uses server API
   const tm = Object.fromEntries(allTeams.map(t=>[t.id,t]));
   // simplified client-side calc
-  const pc = {group:{win:3,draw:1,loss:0},round_of_32:{win:4,loss:0},round_of_16:{win:6,loss:0},quarter_final:{win:10,loss:0},semi_final:{win:15,loss:0},third_place:{win:18,loss:0},final:{win:25,loss:12}};
+  const pc = {group:{win:3,draw:1,loss:0},round_of_32:{win:3,draw:1,loss:0},round_of_16:{win:3,draw:1,loss:0},quarter_final:{win:3,draw:1,loss:0},semi_final:{win:3,draw:1,loss:0},third_place:{win:3,draw:1,loss:0},final:{win:3,draw:1,loss:0}};
   const standings = (draw.users||[]).map(user=>{
     let total=0;
     const teams=(user.teams||[]).map(tid=>{
